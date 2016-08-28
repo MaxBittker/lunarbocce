@@ -20,6 +20,7 @@ const initCanvas = ()=> {
   let game = new Game(renderer)
   let controls = new Control(canvas,game)
   renderer.controls = controls
+
   return game
 }
 let game = initCanvas()

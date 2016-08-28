@@ -22,7 +22,7 @@ export default class Game {
       10,
       15,
       "red")]
-    this.planets = this.genPlanets(1)
+    this.planets = this.genPlanets(5)
   }
   randomPoint(): Victor{
     return new Victor(Math.random()*Universals.width,

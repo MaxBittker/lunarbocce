@@ -37,10 +37,10 @@ var Ball = (function () {
                 var n = planet.position.clone()
                     .subtract(this.position)
                     .normalize();
-                this.velocity.subtract(n.multiplyScalar(this.velocity.dot(n) * 2));
+                this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
                 var delta = (this.position.clone().subtract(planet.position));
                 var d = delta.length();
-                var mtd = delta.multiplyScalar(((this.radius + planet.radius) - d) / d);
+                var mtd = delta.clone().multiplyScalar(((this.radius + planet.radius) - d) / d);
                 this.position.add(mtd);
                 Sound_1.default(this.velocity.length() / 50);
                 this.velocity.multiplyScalar(0.7);
@@ -48,22 +48,26 @@ var Ball = (function () {
         }
         for (var b in balls) {
             var ball = balls[b];
-            if (ball !== this && Body_1.seperation(this, ball) < 0) {
+            if ((ball !== this) && (Body_1.seperation(this, ball) < 0)) {
                 var delta = (this.position.clone().subtract(ball.position));
                 var d = delta.length();
-                var mtd = delta.multiplyScalar(((this.radius + ball.radius) - d) / d);
+                var mtd = delta.clone().multiplyScalar(((this.radius + ball.radius) - d) / d);
                 var im1 = 1 / this.mass;
                 var im2 = 1 / ball.mass;
-                this.position.add(mtd.multiplyScalar(im1 / (im1 + im2)));
-                ball.position.subtract(mtd.multiplyScalar(im2 / (im1 + im2)));
+                this.position.add(mtd.clone().multiplyScalar(im1 / (im1 + im2)));
+                ball.position.subtract(mtd.clone().multiplyScalar(im2 / (im1 + im2)));
                 var v = this.velocity.clone().subtract(ball.velocity);
                 var vn = v.dot(mtd.clone().normalize());
-                if (vn > 0)
-                    return;
-                var i = (-(1.0 + 1.0) * vn) / (im1 + im2);
-                var impulse = mtd.multiplyScalar(i);
-                this.velocity.add(impulse.multiplyScalar(im1));
-                ball.velocity.subtract(impulse.multiplyScalar(im2));
+                if (vn > 0) {
+                    console.log("contunue");
+                    continue;
+                }
+                console.log("APPLY");
+                var i = (-(0.9) * vn) / (im1 + im2);
+                var impulse = mtd.clone().multiplyScalar(i);
+                this.velocity.add(impulse.clone().multiplyScalar(im1));
+                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
+                Sound_1.default(impulse.length() / 50);
             }
         }
     };

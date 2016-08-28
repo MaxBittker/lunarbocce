@@ -8,7 +8,7 @@ var Game = (function () {
     function Game(renderer) {
         this.renderer = renderer;
         this.balls = [new Ball_1.default(new Victor(0, 0), new Victor(10, 0), 10, 15, "red")];
-        this.planets = this.genPlanets(1);
+        this.planets = this.genPlanets(5);
     }
     Game.prototype.randomPoint = function () {
         return new Victor(Math.random() * Universals_1.default.width, Math.random() * Universals_1.default.height);

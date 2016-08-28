@@ -139,8 +139,8 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = {
 	    delta: 0.1,
-	    width: 600,
-	    height: 600,
+	    width: 800,
+	    height: 450,
 	};
 
 
@@ -158,7 +158,7 @@
 	    function Game(renderer) {
 	        this.renderer = renderer;
 	        this.balls = [new Ball_1.default(new Victor(0, 0), new Victor(10, 0), 10, 15, "red")];
-	        this.planets = this.genPlanets(1);
+	        this.planets = this.genPlanets(5);
 	    }
 	    Game.prototype.randomPoint = function () {
 	        return new Victor(Math.random() * Universals_1.default.width, Math.random() * Universals_1.default.height);
@@ -244,44 +244,42 @@
 	                var n = planet.position.clone()
 	                    .subtract(this.position)
 	                    .normalize();
-	                this.velocity.subtract(n.multiplyScalar(this.velocity.dot(n) * 2));
+	                this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
 	                var delta = (this.position.clone().subtract(planet.position));
 	                var d = delta.length();
-	                var mtd = delta.multiplyScalar(((this.radius + planet.radius) - d) / d);
+	                var mtd = delta.clone().multiplyScalar(((this.radius + planet.radius) - d) / d);
 	                this.position.add(mtd);
-	                // this.position.add(
-	                // this.velocity.clone().multiplyScalar(Universals.delta)
-	                // )
 	                Sound_1.default(this.velocity.length() / 50);
 	                this.velocity.multiplyScalar(0.7);
 	            }
 	        }
 	        for (var b in balls) {
 	            var ball = balls[b];
-	            if (ball !== this && Body_1.seperation(this, ball) < 0) {
+	            if ((ball !== this) && (Body_1.seperation(this, ball) < 0)) {
 	                var delta = (this.position.clone().subtract(ball.position));
 	                var d = delta.length();
-	                var mtd = delta.multiplyScalar(((this.radius + ball.radius) - d) / d);
+	                var mtd = delta.clone().multiplyScalar(((this.radius + ball.radius) - d) / d);
 	                // resolve intersection --
 	                // inverse mass quantities
 	                var im1 = 1 / this.mass;
 	                var im2 = 1 / ball.mass;
 	                // push-pull them apart based off their mass
-	                this.position.add(mtd.multiplyScalar(im1 / (im1 + im2)));
-	                ball.position.subtract(mtd.multiplyScalar(im2 / (im1 + im2)));
+	                this.position.add(mtd.clone().multiplyScalar(im1 / (im1 + im2)));
+	                ball.position.subtract(mtd.clone().multiplyScalar(im2 / (im1 + im2)));
 	                // impact speed
 	                var v = this.velocity.clone().subtract(ball.velocity);
 	                var vn = v.dot(mtd.clone().normalize());
 	                // sphere intersecting but moving away from each other already
-	                if (vn > 0)
-	                    return;
-	                // collision impulse
-	                var i = (-(1.0 + 1.0) * vn) / (im1 + im2);
-	                var impulse = mtd.multiplyScalar(i);
-	                // change in momentum
-	                // debugger
-	                this.velocity.add(impulse.multiplyScalar(im1));
-	                ball.velocity.subtract(impulse.multiplyScalar(im2));
+	                if (vn > 0) {
+	                    console.log("contunue");
+	                    continue;
+	                }
+	                console.log("APPLY");
+	                var i = (-(0.9) * vn) / (im1 + im2);
+	                var impulse = mtd.clone().multiplyScalar(i);
+	                this.velocity.add(impulse.clone().multiplyScalar(im1));
+	                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
+	                Sound_1.default(impulse.length() / 50);
 	            }
 	        }
 	    };
