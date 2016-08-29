@@ -19,7 +19,7 @@ body{
 canvas{
   margin: auto;
   /*width: 100%;*/
-  /*max-width: 100vh;*/
-  /*max-height: 100vh;*/
+  max-width: 100vh;
+  max-height: 100vh;
   /*cursor:crosshair;;*/
 }
