@@ -17,7 +17,11 @@ export default class Game {
   constructor(renderer: Renderer) {
     this.renderer = renderer
     this.balls= []
-    this.planets = this.genPlanets(40000)
+    this.planets = this.genPlanets(60000)
+  }
+  newGame(){
+    this.balls= []
+    this.planets = this.genPlanets(60000)
   }
   randomPoint(): Victor{
     let e:number = 190
@@ -32,7 +36,7 @@ export default class Game {
     // debugger
     let planets = []
     while(n>0){
-      let radius = Math.random()*140 + 50
+      let radius = Math.random()*140*(n/60000) + 40
       let newPlanet = new Planet(
         this.randomPoint(),
         Math.PI*radius*radius,
@@ -76,5 +80,8 @@ export default class Game {
       color
     )
     this.balls.push(launched)
+    if(this.balls.length===10){
+      this.newGame()
+    }
   }
 }

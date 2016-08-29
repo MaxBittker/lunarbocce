@@ -40,14 +40,14 @@ var Ball = (function () {
         var d = delta.length();
         var mtd = delta.clone().multiplyScalar(((this.radius + radius) - d) / d);
         this.position.add(mtd);
+        this.velocity.multiplyScalar(0.6);
         Sound_1.default(this.velocity.length() / 50);
-        this.velocity.multiplyScalar(0.7);
     };
     Ball.prototype.update = function (planets, balls) {
         var forceAcc = new Victor(0, 0);
         for (var p in planets) {
             var planet = planets[p];
-            var force = 6.674 * Math.pow(10, 0) *
+            var force = 3.674 * Math.pow(10, 1) *
                 planet.mass * this.mass /
                 Math.pow(this.position.distance(planet.position), 2);
             forceAcc.add(planet.position.clone()
@@ -85,7 +85,7 @@ var Ball = (function () {
                 if (vn > 0) {
                     continue;
                 }
-                var i = (-(0.9) * vn) / (im1 + im2);
+                var i = (-(0.6) * vn) / (im1 + im2);
                 var impulse = mtd.clone().multiplyScalar(i);
                 this.velocity.add(impulse.clone().multiplyScalar(im1));
                 ball.velocity.subtract(impulse.clone().multiplyScalar(im2));

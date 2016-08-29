@@ -39,10 +39,8 @@ export default class Renderer {
       ball.position.y,
       ball.radius);
 
-    rgrd.addColorStop(0, tinycolor(ball.color).toRgbString());
-    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).toRgbString());
-    // rgrd.addColorStop(0,"rgba(200, 0, 200, 0.1)");
-    // rgrd.addColorStop(1,"rgba(0, 0, 200, 0.2)");
+    rgrd.addColorStop(0.1, tinycolor(ball.color).toRgbString());
+    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).darken(20).toRgbString());
     lgrd.addColorStop(0,tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
     lgrd.addColorStop(1,tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
 

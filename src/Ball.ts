@@ -54,14 +54,14 @@ export default class Ball {
     let mtd:Victor = delta.clone().multiplyScalar(((this.radius + radius) - d )/ d );
 
     this.position.add(mtd);
+    this.velocity.multiplyScalar(0.6)
     playSound(this.velocity.length()/50)
-    this.velocity.multiplyScalar(0.7)
   }
   update(planets: Array<Body>, balls: Array<Body>) {
     let forceAcc = new Victor(0,0)
     for(let p in planets){
       let planet = planets[p]
-      let force = 6.674 * Math.pow(10,0) *
+      let force = 3.674 * Math.pow(10,1) *
                   planet.mass * this.mass /
                    Math.pow(this.position.distance(planet.position),2)
       forceAcc.add(planet.position.clone()
@@ -114,7 +114,7 @@ export default class Ball {
         if (vn > 0){
           continue;
         }
-          let i:number = (-(0.9) * vn) / (im1 + im2);
+          let i:number = (-(0.6) * vn) / (im1 + im2);
           let impulse:Victor = mtd.clone().multiplyScalar(i);
           this.velocity.add(impulse.clone().multiplyScalar(im1));
           ball.velocity.subtract(impulse.clone().multiplyScalar(im2))

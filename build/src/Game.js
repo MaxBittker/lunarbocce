@@ -9,8 +9,12 @@ var Game = (function () {
     function Game(renderer) {
         this.renderer = renderer;
         this.balls = [];
-        this.planets = this.genPlanets(40000);
+        this.planets = this.genPlanets(60000);
     }
+    Game.prototype.newGame = function () {
+        this.balls = [];
+        this.planets = this.genPlanets(60000);
+    };
     Game.prototype.randomPoint = function () {
         var e = 190;
         var p = new Victor(0, 0);
@@ -20,7 +24,7 @@ var Game = (function () {
     Game.prototype.genPlanets = function (n) {
         var planets = [];
         var _loop_1 = function() {
-            var radius = Math.random() * 140 + 50;
+            var radius = Math.random() * 140 * (n / 60000) + 40;
             var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) < 100) {
@@ -53,6 +57,9 @@ var Game = (function () {
         }
         var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), radius * radius * Math.PI, radius, color);
         this.balls.push(launched);
+        if (this.balls.length === 10) {
+            this.newGame();
+        }
     };
     return Game;
 }());

@@ -1,11 +1,9 @@
-@import 'https://fonts.googleapis.com/css?family=Inconsolata';
-@import 'https://fonts.googleapis.com/css?family=Slabo+27px';
-
-
+/*@import 'https://fonts.googleapis.com/css?family=Inconsolata';*/
+/*@import 'https://fonts.googleapis.com/css?family=Slabo+27px';*/
 
 *{
   margin: 0;
-  font-family: 'Slabo 27px', serif;
+  /*font-family: 'Slabo 27px', serif;*/
 
 }
 html{
