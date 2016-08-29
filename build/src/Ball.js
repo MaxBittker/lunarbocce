@@ -17,6 +17,32 @@ var Ball = (function () {
         this.radius = radius;
         this.color = color;
     }
+    Ball.prototype.getClosestWall = function () {
+        var _this = this;
+        var wallpoints = [(new Victor(this.position.x, 0)),
+            (new Victor(this.position.x, Universals_1.default.width)),
+            (new Victor(0, this.position.y)),
+            (new Victor(Universals_1.default.width, this.position.y))];
+        var closestwall = wallpoints.reduce(function (min, wp) {
+            if (_this.position.distance(wp) < _this.position.distance(min)) {
+                return wp;
+            }
+            return min;
+        });
+        return closestwall;
+    };
+    Ball.prototype.simpleBounce = function (point, radius) {
+        var n = point.clone()
+            .subtract(this.position)
+            .normalize();
+        this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
+        var delta = (this.position.clone().subtract(point));
+        var d = delta.length();
+        var mtd = delta.clone().multiplyScalar(((this.radius + radius) - d) / d);
+        this.position.add(mtd);
+        Sound_1.default(this.velocity.length() / 50);
+        this.velocity.multiplyScalar(0.7);
+    };
     Ball.prototype.update = function (planets, balls) {
         var forceAcc = new Victor(0, 0);
         for (var p in planets) {
@@ -28,22 +54,20 @@ var Ball = (function () {
                 .subtract(this.position)
                 .normalize()
                 .multiplyScalar(force));
+            if (Body_1.seperation(this, planet) < 0.1) {
+                forceAcc = new Victor(0, 0);
+                break;
+            }
         }
         this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
         this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
+        if (this.position.distance(this.getClosestWall()) < this.radius) {
+            this.simpleBounce(this.getClosestWall(), 0.1);
+        }
         for (var p in planets) {
             var planet = planets[p];
             if (Body_1.seperation(this, planet) < 0) {
-                var n = planet.position.clone()
-                    .subtract(this.position)
-                    .normalize();
-                this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
-                var delta = (this.position.clone().subtract(planet.position));
-                var d = delta.length();
-                var mtd = delta.clone().multiplyScalar(((this.radius + planet.radius) - d) / d);
-                this.position.add(mtd);
-                Sound_1.default(this.velocity.length() / 50);
-                this.velocity.multiplyScalar(0.7);
+                this.simpleBounce(planet.position, planet.radius);
             }
         }
         for (var b in balls) {
@@ -59,15 +83,13 @@ var Ball = (function () {
                 var v = this.velocity.clone().subtract(ball.velocity);
                 var vn = v.dot(mtd.clone().normalize());
                 if (vn > 0) {
-                    console.log("contunue");
                     continue;
                 }
-                console.log("APPLY");
                 var i = (-(0.9) * vn) / (im1 + im2);
                 var impulse = mtd.clone().multiplyScalar(i);
                 this.velocity.add(impulse.clone().multiplyScalar(im1));
                 ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
-                Sound_1.default(impulse.length() / 50);
+                Sound_1.default(impulse.length() / 5000);
             }
         }
     };

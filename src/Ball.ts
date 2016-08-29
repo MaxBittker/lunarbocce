@@ -2,7 +2,6 @@ import Victor = require('victor')
 import Universals from "./Universals";
 import {Body,seperation} from "./Body";
 import playSound from "./Sound";
-import tinycolor from 'tinycolor2';
 enum bodyType {Ball, Planet};
 
 
@@ -27,6 +26,37 @@ export default class Ball {
     this.radius = radius
     this.color = color
   }
+  getClosestWall(){
+
+   let wallpoints: Array<Victor> = [(new Victor(this.position.x,0)),
+                                   (new Victor(this.position.x,Universals.width)),
+                                   (new Victor(0,this.position.y)),
+                                   (new Victor(Universals.width,this.position.y))]
+
+   let closestwall = wallpoints.reduce((min,wp)=>{
+     if(this.position.distance(wp)<this.position.distance(min)){
+       return wp
+     }
+     return min
+   })
+   return closestwall
+  }
+  simpleBounce(point, radius){
+    let n: Victor = point.clone()
+                        .subtract(this.position)
+                        .normalize()
+    this.velocity.subtract(
+      n.clone().multiplyScalar(this.velocity.dot(n) * 2)
+    )
+
+    let delta: Victor  = (this.position.clone().subtract(point));
+    let d:number = delta.length();
+    let mtd:Victor = delta.clone().multiplyScalar(((this.radius + radius) - d )/ d );
+
+    this.position.add(mtd);
+    playSound(this.velocity.length()/50)
+    this.velocity.multiplyScalar(0.7)
+  }
   update(planets: Array<Body>, balls: Array<Body>) {
     let forceAcc = new Victor(0,0)
     for(let p in planets){
@@ -39,8 +69,11 @@ export default class Ball {
                     .normalize()
                     .multiplyScalar(force)
                   )
+    if(seperation(this, planet) < 0.1){
+        forceAcc = new Victor(0,0);
+        break;
     }
-
+  }
     this.velocity.add(
       forceAcc.multiplyScalar(Universals.delta / this.mass)
     )
@@ -49,23 +82,14 @@ export default class Ball {
       this.velocity.clone().multiplyScalar(Universals.delta)
     )
 
+    if(this.position.distance(this.getClosestWall())<this.radius){
+      this.simpleBounce(this.getClosestWall(), 0.1)
+    }
+
     for(let p in planets){
       let planet = planets[p]
       if(seperation(this, planet) < 0){
-        let n: Victor = planet.position.clone()
-                            .subtract(this.position)
-                            .normalize()
-        this.velocity.subtract(
-          n.clone().multiplyScalar(this.velocity.dot(n) * 2)
-        )
-
-        let delta: Victor  = (this.position.clone().subtract(planet.position));
-        let d:number = delta.length();
-        let mtd:Victor = delta.clone().multiplyScalar(((this.radius + planet.radius) - d )/ d );
-
-        this.position.add(mtd);
-        playSound(this.velocity.length()/50)
-        this.velocity.multiplyScalar(0.7)
+        this.simpleBounce(planet.position,planet.radius )
       }
     }
     for( let b in balls){
@@ -88,15 +112,13 @@ export default class Ball {
         let vn:number = v.dot(mtd.clone().normalize());
         // sphere intersecting but moving away from each other already
         if (vn > 0){
-          console.log("contunue")
           continue;
         }
-          console.log("APPLY")
           let i:number = (-(0.9) * vn) / (im1 + im2);
           let impulse:Victor = mtd.clone().multiplyScalar(i);
           this.velocity.add(impulse.clone().multiplyScalar(im1));
           ball.velocity.subtract(impulse.clone().multiplyScalar(im2))
-          playSound(impulse.length()/50)
+          playSound(impulse.length()/5000)
 
       }
     }

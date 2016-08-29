@@ -99,17 +99,17 @@
 	    Renderer.prototype.renderBall = function (ball) {
 	        var lgrd = this.ctx.createLinearGradient(ball.position.x - ball.radius, ball.position.y - ball.radius, ball.position.x + ball.radius, ball.position.y + ball.radius);
 	        var rgrd = this.ctx.createRadialGradient(ball.position.x, ball.position.y, 0, ball.position.x, ball.position.y, ball.radius);
-	        lgrd.addColorStop(0.1, "black");
-	        lgrd.addColorStop(1, "white");
-	        rgrd.addColorStop(0, tinycolor(ball.color).setAlpha(0.1).toRgbString());
-	        rgrd.addColorStop(1, tinycolor(ball.color).spin(50).setAlpha(0.1).toRgbString());
+	        rgrd.addColorStop(0, tinycolor(ball.color).toRgbString());
+	        rgrd.addColorStop(1, tinycolor(ball.color).spin(50).toRgbString());
 	        // rgrd.addColorStop(0,"rgba(200, 0, 200, 0.1)");
 	        // rgrd.addColorStop(1,"rgba(0, 0, 200, 0.2)");
-	        this.ctx.fillStyle = lgrd;
+	        lgrd.addColorStop(0, tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
+	        lgrd.addColorStop(1, tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
+	        this.ctx.fillStyle = rgrd;
 	        this.ctx.beginPath();
 	        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
 	        this.ctx.fill();
-	        this.ctx.fillStyle = rgrd;
+	        this.ctx.fillStyle = lgrd;
 	        this.ctx.beginPath();
 	        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
 	        this.ctx.fill();
@@ -143,7 +143,7 @@
 	exports.default = {
 	    delta: 0.1,
 	    width: 800,
-	    height: 450,
+	    height: 800,
 	};
 
 
@@ -158,7 +158,7 @@
 	var Body_1 = __webpack_require__(7);
 	var Victor = __webpack_require__(6);
 	// import tinycolor from 'tinycolor2';
-	// import tinycolor = require('tinycolor2');
+	var tinycolor = __webpack_require__(11);
 	// let t = tinycolor
 	var Game = (function () {
 	    function Game(renderer) {
@@ -167,7 +167,7 @@
 	        this.planets = this.genPlanets(40000);
 	    }
 	    Game.prototype.randomPoint = function () {
-	        var e = 100;
+	        var e = 190;
 	        var p = new Victor(0, 0);
 	        p.randomize(new Victor(e, e), new Victor(Universals_1.default.width - e, Universals_1.default.height - e));
 	        // return new Victor(Math.random()*Universals.width,
@@ -179,12 +179,12 @@
 	        // debugger
 	        var planets = [];
 	        var _loop_1 = function() {
-	            var radius = Math.random() * 80 + 20;
+	            var radius = Math.random() * 140 + 50;
 	            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, 
 	            // Math.PI*(4/3)*radius*radius*radius,
-	            radius, '#3df');
+	            radius, tinycolor.random().darken(0.9).toRgbString());
 	            var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
-	            if (Math.min.apply(Math, distances) < 10) {
+	            if (Math.min.apply(Math, distances) < 100) {
 	            }
 	            else {
 	                n -= (radius * radius * Math.PI);
@@ -206,9 +206,12 @@
 	    Game.prototype.launch = function (start, end) {
 	        var isBoccino = this.balls.length == 0;
 	        var radius = isBoccino ? 9 : 15;
-	        // let color = isBoccino ? tinycolor('white').toRgbString()
-	        // : tinycolor('red').toRgbString()
-	        var color = isBoccino ? 'red' : 'blue';
+	        var color = isBoccino ? tinycolor('white').toRgbString()
+	            : tinycolor('red').toRgbString();
+	        if (!isBoccino) {
+	            color = this.balls.length % 2 ? tinycolor('red').toRgbString()
+	                : tinycolor('green').toRgbString();
+	        }
 	        var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), radius * radius * Math.PI, radius, color);
 	        this.balls.push(launched);
 	    };
@@ -241,6 +244,32 @@
 	        this.radius = radius;
 	        this.color = color;
 	    }
+	    Ball.prototype.getClosestWall = function () {
+	        var _this = this;
+	        var wallpoints = [(new Victor(this.position.x, 0)),
+	            (new Victor(this.position.x, Universals_1.default.width)),
+	            (new Victor(0, this.position.y)),
+	            (new Victor(Universals_1.default.width, this.position.y))];
+	        var closestwall = wallpoints.reduce(function (min, wp) {
+	            if (_this.position.distance(wp) < _this.position.distance(min)) {
+	                return wp;
+	            }
+	            return min;
+	        });
+	        return closestwall;
+	    };
+	    Ball.prototype.simpleBounce = function (point, radius) {
+	        var n = point.clone()
+	            .subtract(this.position)
+	            .normalize();
+	        this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
+	        var delta = (this.position.clone().subtract(point));
+	        var d = delta.length();
+	        var mtd = delta.clone().multiplyScalar(((this.radius + radius) - d) / d);
+	        this.position.add(mtd);
+	        Sound_1.default(this.velocity.length() / 50);
+	        this.velocity.multiplyScalar(0.7);
+	    };
 	    Ball.prototype.update = function (planets, balls) {
 	        var forceAcc = new Victor(0, 0);
 	        for (var p in planets) {
@@ -252,23 +281,21 @@
 	                .subtract(this.position)
 	                .normalize()
 	                .multiplyScalar(force));
+	            if (Body_1.seperation(this, planet) < 0.1) {
+	                forceAcc = new Victor(0, 0);
+	                break;
+	            }
 	        }
 	        this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
 	        //apply update
 	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
+	        if (this.position.distance(this.getClosestWall()) < this.radius) {
+	            this.simpleBounce(this.getClosestWall(), 0.1);
+	        }
 	        for (var p in planets) {
 	            var planet = planets[p];
 	            if (Body_1.seperation(this, planet) < 0) {
-	                var n = planet.position.clone()
-	                    .subtract(this.position)
-	                    .normalize();
-	                this.velocity.subtract(n.clone().multiplyScalar(this.velocity.dot(n) * 2));
-	                var delta = (this.position.clone().subtract(planet.position));
-	                var d = delta.length();
-	                var mtd = delta.clone().multiplyScalar(((this.radius + planet.radius) - d) / d);
-	                this.position.add(mtd);
-	                Sound_1.default(this.velocity.length() / 50);
-	                this.velocity.multiplyScalar(0.7);
+	                this.simpleBounce(planet.position, planet.radius);
 	            }
 	        }
 	        for (var b in balls) {
@@ -289,15 +316,13 @@
 	                var vn = v.dot(mtd.clone().normalize());
 	                // sphere intersecting but moving away from each other already
 	                if (vn > 0) {
-	                    console.log("contunue");
 	                    continue;
 	                }
-	                console.log("APPLY");
 	                var i = (-(0.9) * vn) / (im1 + im2);
 	                var impulse = mtd.clone().multiplyScalar(i);
 	                this.velocity.add(impulse.clone().multiplyScalar(im1));
 	                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
-	                Sound_1.default(impulse.length() / 50);
+	                Sound_1.default(impulse.length() / 5000);
 	            }
 	        }
 	    };
@@ -1656,7 +1681,7 @@
 	var sound = new Audio('sounds/b2b1.wav');
 	var playSound = function (volume) {
 	    if (volume > 0.2 && (sound.currentTime > 0.01 || sound.currentTime === 0)) {
-	        sound.pause(); // Perhaps optional
+	        // sound.pause(); // Perhaps optional
 	        sound.currentTime = 0;
 	        sound.volume = Math.min(1, volume);
 	        sound.play();
@@ -1697,13 +1722,37 @@
 	        var _this = this;
 	        this.canvas = canvas;
 	        this.game = game;
+	        //start
+	        // canvas.addEventListener('ontouchstart',(e)=>{
+	        // console.log("startdrag")
+	        // this.startDrag = new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
+	        // console.log(this.startDrag)
+	        // e.preventDefault()
+	        // })
+	        canvas.ontouchstart = function (e) {
+	            console.log("startdrag");
+	            _this.startDrag = new Victor(e.touches[0].clientX - _this.canvas.offsetLeft, e.touches[0].clientY - _this.canvas.offsetTop);
+	            console.log(_this.startDrag);
+	            e.preventDefault();
+	        };
 	        canvas.onmousedown = function (e) {
 	            _this.startDrag = new Victor(e.offsetX, e.offsetY);
 	        };
-	        canvas.onmousemove = function (e) {
-	            _this.mousePos = new Victor(e.offsetX, e.offsetY);
+	        //move
+	        document.ontouchmove = function (e) {
+	            _this.mousePos = new Victor(e.touches[0].clientX - _this.canvas.offsetLeft, e.touches[0].clientY - _this.canvas.offsetTop);
+	            e.preventDefault();
 	        };
-	        canvas.onmouseup = function (e) {
+	        document.body.onmousemove = function (e) {
+	            _this.mousePos = new Victor(e.clientX - _this.canvas.offsetLeft, e.clientY - _this.canvas.offsetTop);
+	        };
+	        //end
+	        document.body.ontouchend = function (e) {
+	            _this.game.launch(_this.startDrag, _this.mousePos);
+	            _this.startDrag = undefined;
+	            e.preventDefault();
+	        };
+	        document.body.onmouseup = function (e) {
 	            _this.game.launch(_this.startDrag, _this.mousePos);
 	            _this.startDrag = undefined;
 	        };

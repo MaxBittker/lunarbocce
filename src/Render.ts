@@ -39,19 +39,19 @@ export default class Renderer {
       ball.position.y,
       ball.radius);
 
-    lgrd.addColorStop(0.1,"black");
-    lgrd.addColorStop(1,"white");
-    rgrd.addColorStop(0, tinycolor(ball.color).setAlpha(0.1).toRgbString());
-    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).setAlpha(0.1).toRgbString());
+    rgrd.addColorStop(0, tinycolor(ball.color).toRgbString());
+    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).toRgbString());
     // rgrd.addColorStop(0,"rgba(200, 0, 200, 0.1)");
     // rgrd.addColorStop(1,"rgba(0, 0, 200, 0.2)");
+    lgrd.addColorStop(0,tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
+    lgrd.addColorStop(1,tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
 
-    this.ctx.fillStyle=lgrd;
+    this.ctx.fillStyle=rgrd;
     this.ctx.beginPath()
     this.ctx.arc(ball.position.x,ball.position.y,ball.radius,0,180)
     this.ctx.fill()
 
-    this.ctx.fillStyle=rgrd;
+    this.ctx.fillStyle=lgrd;
     this.ctx.beginPath()
     this.ctx.arc(ball.position.x,ball.position.y,ball.radius,0,180)
     this.ctx.fill()

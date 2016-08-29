@@ -5,7 +5,7 @@ import Planet from "./Planet";
 import {Body,seperation} from "./Body";
 import Victor = require('victor')
 // import tinycolor from 'tinycolor2';
-// import tinycolor = require('tinycolor2');
+import tinycolor = require('tinycolor2');
 // let t = tinycolor
 export default class Game {
 
@@ -20,7 +20,7 @@ export default class Game {
     this.planets = this.genPlanets(40000)
   }
   randomPoint(): Victor{
-    let e:number = 100
+    let e:number = 190
     let p:Victor = new Victor(0,0)
     p.randomize(new Victor(e,e), new Victor(Universals.width-e,Universals.height-e))
     // return new Victor(Math.random()*Universals.width,
@@ -32,17 +32,16 @@ export default class Game {
     // debugger
     let planets = []
     while(n>0){
-      let radius = Math.random()*80 + 20
+      let radius = Math.random()*140 + 50
       let newPlanet = new Planet(
         this.randomPoint(),
         Math.PI*radius*radius,
         // Math.PI*(4/3)*radius*radius*radius,
         radius,
-        '#3df'
-        // tinycolor.random().toRgbString()
+        tinycolor.random().darken(0.9).toRgbString()
       )
       let distances = planets.map(p=>seperation(newPlanet,p))
-      if(Math.min(...distances)<10){
+      if(Math.min(...distances)<100){
         // n+=(radius*radius*Math.PI)
       }else{
         n-=(radius*radius*Math.PI)
@@ -62,9 +61,13 @@ export default class Game {
   launch(start:Victor,end:Victor){
     let isBoccino = this.balls.length ==0
     let radius = isBoccino ? 9 : 15
-    // let color = isBoccino ? tinycolor('white').toRgbString()
-                          // : tinycolor('red').toRgbString()
-let color =  isBoccino ? 'red' : 'blue'
+    let color:string = isBoccino ? tinycolor('white').toRgbString()
+                          : tinycolor('red').toRgbString()
+    if(!isBoccino){
+      color = this.balls.length%2 ? tinycolor('red').toRgbString()
+                                         : tinycolor('green').toRgbString()
+
+    }
     let launched: Ball = new Ball(
       start,
       start.clone().subtract(end).multiplyScalar(0.65),

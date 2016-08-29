@@ -4,6 +4,7 @@ var Ball_1 = require("./Ball");
 var Planet_1 = require("./Planet");
 var Body_1 = require("./Body");
 var Victor = require('victor');
+var tinycolor = require('tinycolor2');
 var Game = (function () {
     function Game(renderer) {
         this.renderer = renderer;
@@ -11,7 +12,7 @@ var Game = (function () {
         this.planets = this.genPlanets(40000);
     }
     Game.prototype.randomPoint = function () {
-        var e = 100;
+        var e = 190;
         var p = new Victor(0, 0);
         p.randomize(new Victor(e, e), new Victor(Universals_1.default.width - e, Universals_1.default.height - e));
         return p;
@@ -19,10 +20,10 @@ var Game = (function () {
     Game.prototype.genPlanets = function (n) {
         var planets = [];
         var _loop_1 = function() {
-            var radius = Math.random() * 80 + 20;
-            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, '#3df');
+            var radius = Math.random() * 140 + 50;
+            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
-            if (Math.min.apply(Math, distances) < 10) {
+            if (Math.min.apply(Math, distances) < 100) {
             }
             else {
                 n -= (radius * radius * Math.PI);
@@ -44,7 +45,12 @@ var Game = (function () {
     Game.prototype.launch = function (start, end) {
         var isBoccino = this.balls.length == 0;
         var radius = isBoccino ? 9 : 15;
-        var color = isBoccino ? 'red' : 'blue';
+        var color = isBoccino ? tinycolor('white').toRgbString()
+            : tinycolor('red').toRgbString();
+        if (!isBoccino) {
+            color = this.balls.length % 2 ? tinycolor('red').toRgbString()
+                : tinycolor('green').toRgbString();
+        }
         var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), radius * radius * Math.PI, radius, color);
         this.balls.push(launched);
     };

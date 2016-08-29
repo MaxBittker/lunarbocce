@@ -1,0 +1,25 @@
+@import 'https://fonts.googleapis.com/css?family=Inconsolata';
+@import 'https://fonts.googleapis.com/css?family=Slabo+27px';
+
+
+
+*{
+  margin: 0;
+  font-family: 'Slabo 27px', serif;
+
+}
+html{
+  background-color: #445;
+}
+body{
+  display: flex;
+  align-content: center;
+  justify-content:center;
+}
+canvas{
+  margin: auto;
+  /*width: 100%;*/
+  /*max-width: 100vh;*/
+  /*max-height: 100vh;*/
+  /*cursor:crosshair;;*/
+}
