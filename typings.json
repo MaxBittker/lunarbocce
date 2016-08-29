@@ -1,5 +1,6 @@
 {
   "globalDependencies": {
+    "tinycolor": "registry:dt/tinycolor#1.1.1+20160317120654",
     "victor": "github:DefinitelyTyped/DefinitelyTyped/victor/victor.d.ts"
   },
   "dependencies": {

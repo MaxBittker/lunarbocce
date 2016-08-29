@@ -3,8 +3,8 @@ import Ball from "./src/Ball";
 import Game from "./src/Game";
 import Universals from "./src/Universals";
 import Control from "./src/Control";
-
 import Victor = require('victor')
+import tinycolor = require('tinycolor2');
 
 
 const initCanvas = ()=> {

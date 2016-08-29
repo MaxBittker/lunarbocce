@@ -1,7 +1,8 @@
- import Victor = require('victor')
+import Victor = require('victor')
 import Universals from "./Universals";
 import {Body,seperation} from "./Body";
 import playSound from "./Sound";
+import tinycolor from 'tinycolor2';
 enum bodyType {Ball, Planet};
 
 

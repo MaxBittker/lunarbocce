@@ -28,6 +28,7 @@
     "ts-loader": "^0.8.2"
   },
   "dependencies": {
+    "tinycolor2": "^1.4.1",
     "victor": "^1.1.0"
   }
 }

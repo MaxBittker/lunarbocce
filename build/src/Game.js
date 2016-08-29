@@ -7,27 +7,30 @@ var Victor = require('victor');
 var Game = (function () {
     function Game(renderer) {
         this.renderer = renderer;
-        this.balls = [new Ball_1.default(new Victor(0, 0), new Victor(10, 0), 10, 15, "red")];
-        this.planets = this.genPlanets(5);
+        this.balls = [];
+        this.planets = this.genPlanets(40000);
     }
     Game.prototype.randomPoint = function () {
-        return new Victor(Math.random() * Universals_1.default.width, Math.random() * Universals_1.default.height);
+        var e = 100;
+        var p = new Victor(0, 0);
+        p.randomize(new Victor(e, e), new Victor(Universals_1.default.width - e, Universals_1.default.height - e));
+        return p;
     };
     Game.prototype.genPlanets = function (n) {
         var planets = [];
         var _loop_1 = function() {
-            var radius = Math.random() * 100 + 10;
-            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, "red");
+            var radius = Math.random() * 80 + 20;
+            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, '#3df');
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) < 10) {
-                n++;
             }
             else {
+                n -= (radius * radius * Math.PI);
                 planets.push(newPlanet);
             }
         };
         var this_1 = this;
-        for (; n > 0; n--) {
+        while (n > 0) {
             _loop_1();
         }
         return planets;
@@ -39,7 +42,10 @@ var Game = (function () {
         this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
     };
     Game.prototype.launch = function (start, end) {
-        var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), 10, 15, "red");
+        var isBoccino = this.balls.length == 0;
+        var radius = isBoccino ? 9 : 15;
+        var color = isBoccino ? 'red' : 'blue';
+        var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), radius * radius * Math.PI, radius, color);
         this.balls.push(launched);
     };
     return Game;

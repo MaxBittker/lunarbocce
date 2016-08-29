@@ -3,8 +3,8 @@ import assign = require("object-assign");
 import Ball from "./Ball";
 import Universals from "./Universals";
 import Control from "./Control";
-
 import {Body} from "./Body";
+import tinycolor = require('tinycolor2');
 
 export default class Renderer {
 
@@ -39,11 +39,12 @@ export default class Renderer {
       ball.position.y,
       ball.radius);
 
-    lgrd.addColorStop(0,"black");
+    lgrd.addColorStop(0.1,"black");
     lgrd.addColorStop(1,"white");
-
-    rgrd.addColorStop(0,"rgba(200, 0, 200, 0.1)");
-    rgrd.addColorStop(1,"rgba(0, 0, 200, 0.2)");
+    rgrd.addColorStop(0, tinycolor(ball.color).setAlpha(0.1).toRgbString());
+    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).setAlpha(0.1).toRgbString());
+    // rgrd.addColorStop(0,"rgba(200, 0, 200, 0.1)");
+    // rgrd.addColorStop(1,"rgba(0, 0, 200, 0.2)");
 
     this.ctx.fillStyle=lgrd;
     this.ctx.beginPath()
