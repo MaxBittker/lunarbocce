@@ -120,6 +120,20 @@ export default class Renderer {
     })
     return balls
   }
+  renderHUD(points:Object){
+    this.ctx.strokeStyle="rgba(255, 255, 255, 1)";
+    this.ctx.font = "30px 'Helvetica'";
+    this.ctx.textBaseline = 'alphabetic';
+
+    this.ctx.fillStyle = tinycolor(Universals.teamColors.red).darken(20).toRgbString();
+    this.ctx.fillText (points[team.red].toString(), 10, 30);
+
+    this.ctx.fillStyle = tinycolor(Universals.teamColors.green).darken(10).toRgbString();
+    this.ctx.fillText (points[team.green].toString(), 40, 30);
+
+    // this.ctx.strokeText /(mark, ball.position.x, ball.position.y);
+
+  }
   renderScore(boccino:Ball,scoreBalls:Array<{d:number,ball:Ball}>,animTick:number):boolean{
     this.ctx.strokeStyle="rgba(255, 255, 255, 1)";
 

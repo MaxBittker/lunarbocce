@@ -61,6 +61,7 @@ var Ball = (function () {
     };
     Ball.prototype.update = function (planets, balls) {
         var forceAcc = new Victor(0, 0);
+        var friction = false;
         for (var p in planets) {
             var planet = planets[p];
             var force = 3.674 * Math.pow(10, 1) *
@@ -70,9 +71,8 @@ var Ball = (function () {
                 .subtract(this.position)
                 .normalize()
                 .multiplyScalar(force));
-            if (Body_1.seperation(this, planet) < 1) {
-                forceAcc = new Victor(0, 0);
-                break;
+            if (Body_1.seperation(this, planet) < 2) {
+                friction = true;
             }
         }
         this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
@@ -82,6 +82,9 @@ var Ball = (function () {
         }
         if (this.velocity.length() > 175) {
             this.velocity.multiplyScalar(0.9);
+        }
+        if (this.velocity.length() < 8 && friction) {
+            this.velocity.multiplyScalar(0);
         }
         this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
         if (this.position.distance(this.getClosestWall()) < this.radius) {

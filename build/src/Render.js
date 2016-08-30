@@ -80,6 +80,15 @@ var Renderer = (function () {
         });
         return balls;
     };
+    Renderer.prototype.renderHUD = function (points) {
+        this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+        this.ctx.font = "30px 'Helvetica'";
+        this.ctx.textBaseline = 'alphabetic';
+        this.ctx.fillStyle = tinycolor(Universals_1.default.teamColors.red).darken(20).toRgbString();
+        this.ctx.fillText(points[team.red].toString(), 10, 30);
+        this.ctx.fillStyle = tinycolor(Universals_1.default.teamColors.green).darken(10).toRgbString();
+        this.ctx.fillText(points[team.green].toString(), 40, 30);
+    };
     Renderer.prototype.renderScore = function (boccino, scoreBalls, animTick) {
         this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         this.ctx.font = "30px 'Helvetica'";

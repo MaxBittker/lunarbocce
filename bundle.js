@@ -163,6 +163,16 @@
 	        });
 	        return balls;
 	    };
+	    Renderer.prototype.renderHUD = function (points) {
+	        this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+	        this.ctx.font = "30px 'Helvetica'";
+	        this.ctx.textBaseline = 'alphabetic';
+	        this.ctx.fillStyle = tinycolor(Universals_1.default.teamColors.red).darken(20).toRgbString();
+	        this.ctx.fillText(points[team.red].toString(), 10, 30);
+	        this.ctx.fillStyle = tinycolor(Universals_1.default.teamColors.green).darken(10).toRgbString();
+	        this.ctx.fillText(points[team.green].toString(), 40, 30);
+	        // this.ctx.strokeText /(mark, ball.position.x, ball.position.y);
+	    };
 	    Renderer.prototype.renderScore = function (boccino, scoreBalls, animTick) {
 	        this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
 	        this.ctx.font = "30px 'Helvetica'";
@@ -279,6 +289,7 @@
 	    };
 	    Ball.prototype.update = function (planets, balls) {
 	        var forceAcc = new Victor(0, 0);
+	        var friction = false;
 	        for (var p in planets) {
 	            var planet = planets[p];
 	            var force = 3.674 * Math.pow(10, 1) *
@@ -288,9 +299,8 @@
 	                .subtract(this.position)
 	                .normalize()
 	                .multiplyScalar(force));
-	            if (Body_1.seperation(this, planet) < 1) {
-	                forceAcc = new Victor(0, 0);
-	                break;
+	            if (Body_1.seperation(this, planet) < 2) {
+	                friction = true;
 	            }
 	        }
 	        this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
@@ -301,6 +311,9 @@
 	        }
 	        if (this.velocity.length() > 175) {
 	            this.velocity.multiplyScalar(0.9);
+	        }
+	        if (this.velocity.length() < 8 && friction) {
+	            this.velocity.multiplyScalar(0);
 	        }
 	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
 	        if (this.position.distance(this.getClosestWall()) < this.radius) {
@@ -2980,6 +2993,9 @@
 	        this.newGame();
 	        this.renderer = renderer;
 	        this.animTick = 0;
+	        this.points = {};
+	        this.points[team.red] = 0;
+	        this.points[team.green] = 0;
 	    }
 	    Game.prototype.newGame = function () {
 	        this.stage = stage.play;
@@ -3020,6 +3036,7 @@
 	        var _this = this;
 	        var bodys = this.balls.concat(this.planets);
 	        this.renderer.render(bodys, this.balls.length);
+	        this.renderer.renderHUD(this.points);
 	        if (this.stage === stage.play) {
 	            this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
 	        }
@@ -3027,6 +3044,8 @@
 	            var done = this.renderer.renderScore(this.balls[0], this.score(), this.animTick);
 	            this.animTick++;
 	            if (done) {
+	                if (this.stage == stage.score)
+	                    this.points[this.score()[0].ball.teamon] += (this.score().length - 1);
 	                this.stage = stage.waiting;
 	            }
 	        }

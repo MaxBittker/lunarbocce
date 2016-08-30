@@ -16,11 +16,15 @@ export default class Game {
   public balls: Array<Ball>
   public stage: stage
   public animTick: number
+  public points: Object
 
   constructor(renderer: Renderer) {
     this.newGame()
     this.renderer = renderer
     this.animTick = 0;
+    this.points = {}
+    this.points[team.red] = 0
+    this.points[team.green] = 0
   }
   newGame(){
     this.stage = stage.play
@@ -60,17 +64,18 @@ export default class Game {
   tick(){
       let bodys: Array<Body> = [...this.balls,...this.planets]
       this.renderer.render(bodys,this.balls.length)
-
+      this.renderer.renderHUD(this.points)
       if(this.stage===stage.play){
         this.balls.forEach(
           b=>b.update(this.planets, this.balls)
         )
       }
-
       if(this.stage === stage.score || this.stage === stage.waiting){
         let done = this.renderer.renderScore(this.balls[0],this.score(),this.animTick)
         this.animTick++
         if(done){
+          if(this.stage==stage.score)
+            this.points[this.score()[0].ball.teamon]+=(this.score().length-1)
           this.stage = stage.waiting
         }
       }

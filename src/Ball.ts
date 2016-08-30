@@ -73,6 +73,7 @@ export default class Ball {
   }
   update(planets: Array<Body>, balls: Array<Body>) {
     let forceAcc = new Victor(0,0)
+    let friction = false
     for(let p in planets){
       let planet = planets[p]
       let force = 3.674 * Math.pow(10,1) *
@@ -83,14 +84,14 @@ export default class Ball {
                     .normalize()
                     .multiplyScalar(force)
                   )
-    if(seperation(this, planet) < 1){
-        forceAcc = new Victor(0,0);
-        break;
+    if(seperation(this, planet) < 2){
+        friction = true
     }
   }
     this.velocity.add(
       forceAcc.multiplyScalar(Universals.delta / this.mass)
     )
+
     //apply update
     if(this.velocity.length()>200){
       this.velocity.limit(Infinity,200/this.velocity.length())
@@ -98,6 +99,9 @@ export default class Ball {
     }
     if(this.velocity.length()>175){
       this.velocity.multiplyScalar(0.9)
+    }
+    if(this.velocity.length()<8 && friction){
+      this.velocity.multiplyScalar(0)
     }
 
     this.position.add(
