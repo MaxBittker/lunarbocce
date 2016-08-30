@@ -5,6 +5,9 @@ import Universals from "./Universals";
 import Control from "./Control";
 import {Body} from "./Body";
 import tinycolor = require('tinycolor2');
+import Victor = require('victor')
+
+enum team {"boccino", "red", "green"};
 
 export default class Renderer {
 
@@ -14,44 +17,45 @@ export default class Renderer {
   constructor(ctx:CanvasRenderingContext2D) {
     this.ctx = ctx
   }
-  render(balls: Array<Body>) {
+  render(bodys: Array<Body>, shots:number) {
     this.ctx.fillStyle = `hsla(180, 0% ,10%,0.5)`
 
-    this.ctx.fillRect(0,0,Universals.width,Universals.height)
-    for (let i in balls){
-      let ball = balls[i]
+    this.ctx.fillRect(0,0,Universals.bounds.x,Universals.bounds.y)
+    let allBalls = [...bodys, ...this.hudBalls(9-shots)]
+
+    for (let i in allBalls){
+      let ball = allBalls[i]
       this.renderBall(ball)
     }
     this.renderShot()
   }
-  renderBall(ball){
-
+  renderBall(body: Body){
     let lgrd: CanvasGradient = this.ctx.createLinearGradient(
-      ball.position.x-ball.radius,
-      ball.position.y-ball.radius,
-      ball.position.x+ball.radius,
-      ball.position.y+ball.radius);
+      body.position.x-body.radius,
+      body.position.y-body.radius,
+      body.position.x+body.radius,
+      body.position.y+body.radius);
     let rgrd: CanvasGradient = this.ctx.createRadialGradient(
-      ball.position.x,
-      ball.position.y,
+      body.position.x,
+      body.position.y,
       0,
-      ball.position.x,
-      ball.position.y,
-      ball.radius);
+      body.position.x,
+      body.position.y,
+      body.radius);
 
-    rgrd.addColorStop(0.1, tinycolor(ball.color).toRgbString());
-    rgrd.addColorStop(1, tinycolor(ball.color).spin(50).darken(20).toRgbString());
-    lgrd.addColorStop(0,tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
-    lgrd.addColorStop(1,tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
+    rgrd.addColorStop(0.1, tinycolor(body.color).toRgbString());
+    rgrd.addColorStop(1, tinycolor(body.color).spin(50).darken(20).toRgbString());
+    lgrd.addColorStop(0,tinycolor(body.color).darken(100).setAlpha(0.7).toRgbString());
+    lgrd.addColorStop(1,tinycolor(body.color).lighten(100).setAlpha(0.7).toRgbString());
 
     this.ctx.fillStyle=rgrd;
     this.ctx.beginPath()
-    this.ctx.arc(ball.position.x,ball.position.y,ball.radius,0,180)
+    this.ctx.arc(body.position.x,body.position.y,body.radius,0,180)
     this.ctx.fill()
 
     this.ctx.fillStyle=lgrd;
     this.ctx.beginPath()
-    this.ctx.arc(ball.position.x,ball.position.y,ball.radius,0,180)
+    this.ctx.arc(body.position.x,body.position.y,body.radius,0,180)
     this.ctx.fill()
 
   }
@@ -72,14 +76,20 @@ export default class Renderer {
       0,180)
     this.ctx.fill()}
   }
-  renderHUD(nleft){
-    let left = []
-    // [team.boccino]?
-    for(var i=0;i<nleft;i++){
-      left.push(
-        // teamZ
-      )
+  hudBalls(nleft){
+    let left = [team.boccino]
+    var i =0
+    while(i<4){
+      i++
+      left.push(team.red)
+      left.push(team.green)
     }
-
+    let balls: Array<Ball> = left.slice(9-nleft).map((team,i)=>{
+    return new Ball(
+      new Victor(10+(i*20),12),
+      new Victor(0,0),
+      team)
+    })
+    return balls
   }
 }

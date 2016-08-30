@@ -1,33 +1,43 @@
 "use strict";
+var Ball_1 = require("./Ball");
 var Universals_1 = require("./Universals");
 var tinycolor = require('tinycolor2');
+var Victor = require('victor');
+var team;
+(function (team) {
+    team[team["boccino"] = 0] = "boccino";
+    team[team["red"] = 1] = "red";
+    team[team["green"] = 2] = "green";
+})(team || (team = {}));
+;
 var Renderer = (function () {
     function Renderer(ctx) {
         this.ctx = ctx;
     }
-    Renderer.prototype.render = function (balls) {
+    Renderer.prototype.render = function (bodys, shots) {
         this.ctx.fillStyle = "hsla(180, 0% ,10%,0.5)";
-        this.ctx.fillRect(0, 0, Universals_1.default.width, Universals_1.default.height);
-        for (var i in balls) {
-            var ball = balls[i];
+        this.ctx.fillRect(0, 0, Universals_1.default.bounds.x, Universals_1.default.bounds.y);
+        var allBalls = bodys.concat(this.hudBalls(9 - shots));
+        for (var i in allBalls) {
+            var ball = allBalls[i];
             this.renderBall(ball);
         }
         this.renderShot();
     };
-    Renderer.prototype.renderBall = function (ball) {
-        var lgrd = this.ctx.createLinearGradient(ball.position.x - ball.radius, ball.position.y - ball.radius, ball.position.x + ball.radius, ball.position.y + ball.radius);
-        var rgrd = this.ctx.createRadialGradient(ball.position.x, ball.position.y, 0, ball.position.x, ball.position.y, ball.radius);
-        rgrd.addColorStop(0.1, tinycolor(ball.color).toRgbString());
-        rgrd.addColorStop(1, tinycolor(ball.color).spin(50).darken(20).toRgbString());
-        lgrd.addColorStop(0, tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
-        lgrd.addColorStop(1, tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
+    Renderer.prototype.renderBall = function (body) {
+        var lgrd = this.ctx.createLinearGradient(body.position.x - body.radius, body.position.y - body.radius, body.position.x + body.radius, body.position.y + body.radius);
+        var rgrd = this.ctx.createRadialGradient(body.position.x, body.position.y, 0, body.position.x, body.position.y, body.radius);
+        rgrd.addColorStop(0.1, tinycolor(body.color).toRgbString());
+        rgrd.addColorStop(1, tinycolor(body.color).spin(50).darken(20).toRgbString());
+        lgrd.addColorStop(0, tinycolor(body.color).darken(100).setAlpha(0.7).toRgbString());
+        lgrd.addColorStop(1, tinycolor(body.color).lighten(100).setAlpha(0.7).toRgbString());
         this.ctx.fillStyle = rgrd;
         this.ctx.beginPath();
-        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
+        this.ctx.arc(body.position.x, body.position.y, body.radius, 0, 180);
         this.ctx.fill();
         this.ctx.fillStyle = lgrd;
         this.ctx.beginPath();
-        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
+        this.ctx.arc(body.position.x, body.position.y, body.radius, 0, 180);
         this.ctx.fill();
     };
     Renderer.prototype.renderShot = function () {
@@ -44,11 +54,18 @@ var Renderer = (function () {
             this.ctx.fill();
         }
     };
-    Renderer.prototype.renderHUD = function (nleft) {
-        var left = [];
-        for (var i = 0; i < nleft; i++) {
-            left.push();
+    Renderer.prototype.hudBalls = function (nleft) {
+        var left = [team.boccino];
+        var i = 0;
+        while (i < 4) {
+            i++;
+            left.push(team.red);
+            left.push(team.green);
         }
+        var balls = left.slice(9 - nleft).map(function (team, i) {
+            return new Ball_1.default(new Victor(10 + (i * 20), 12), new Victor(0, 0), team);
+        });
+        return balls;
     };
     return Renderer;
 }());

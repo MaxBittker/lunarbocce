@@ -12,8 +12,8 @@ var team;
 ;
 var initCanvas = function () {
     var canvas = document.createElement("canvas");
-    canvas.width = Universals_1.default.width;
-    canvas.height = Universals_1.default.height;
+    canvas.width = Universals_1.default.bounds.x;
+    canvas.height = Universals_1.default.bounds.y;
     var ctx = canvas.getContext("2d");
     document.body.appendChild(canvas);
     var renderer = new Render_1.default(ctx);

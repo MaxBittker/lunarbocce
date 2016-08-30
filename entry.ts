@@ -10,8 +10,8 @@ enum team {"boccino", "red", "green"};
 
 const initCanvas = ()=> {
   let canvas = document.createElement("canvas");
-  canvas.width = Universals.width;
-  canvas.height = Universals.height;
+  canvas.width = Universals.bounds.x;
+  canvas.height = Universals.bounds.y;
   let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
 
 

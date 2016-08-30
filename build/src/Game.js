@@ -16,23 +16,25 @@ var Game = (function () {
     function Game(renderer) {
         this.renderer = renderer;
         this.balls = [];
-        this.planets = this.genPlanets(60000);
+        this.planets = this.genPlanets();
     }
     Game.prototype.newGame = function () {
         this.balls = [];
-        this.planets = this.genPlanets(60000);
+        this.planets = this.genPlanets();
     };
     Game.prototype.randomPoint = function () {
         var e = 190;
         var p = new Victor(0, 0);
-        p.randomize(new Victor(e, e), new Victor(Universals_1.default.width - e, Universals_1.default.height - e));
+        p.randomize(new Victor(e, e), new Victor(Universals_1.default.bounds.x - e, Universals_1.default.bounds.y - e));
         return p;
     };
-    Game.prototype.genPlanets = function (n) {
+    Game.prototype.genPlanets = function () {
+        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .3;
+        var on = n;
         var planets = [];
-        var fuse = 1000;
+        var fuse = 10000;
         var _loop_1 = function() {
-            var radius = Math.random() * 140 * (n / 60000) + 40;
+            var radius = Math.random() * 100 * (n / on) + 30;
             var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) > 100) {
@@ -53,7 +55,7 @@ var Game = (function () {
     Game.prototype.tick = function () {
         var _this = this;
         var bodys = this.balls.concat(this.planets);
-        this.renderer.render(bodys);
+        this.renderer.render(bodys, this.balls.length);
         this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
     };
     Game.prototype.launch = function (start, end) {

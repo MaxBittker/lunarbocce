@@ -18,29 +18,28 @@ export default class Game {
   constructor(renderer: Renderer) {
     this.renderer = renderer
     this.balls= []
-    this.planets = this.genPlanets(60000)
+    this.planets = this.genPlanets()
   }
   newGame(){
     this.balls= []
-    this.planets = this.genPlanets(60000)
+    this.planets = this.genPlanets()
   }
   randomPoint(): Victor{
     let e:number = 190
     let p:Victor = new Victor(0,0)
-    p.randomize(new Victor(e,e), new Victor(Universals.width-e,Universals.height-e))
-    // return new Victor(Math.random()*Universals.width,
-                      // Math.random()*Universals.height)
+    p.randomize(new Victor(e,e), new Victor(Universals.bounds.x-e,Universals.bounds.y-e))
     return p
   }
-  genPlanets(n){
+  genPlanets(){
+    let n = Universals.bounds.x*Universals.bounds.y*.3
+    let on = n
     let planets = []
-    let fuse = 1000
+    let fuse = 10000
     while(n>0){
-      let radius = Math.random()*140*(n/60000) + 40
+      let radius = Math.random()*100*(n/on) + 30
       let newPlanet = new Planet(
         this.randomPoint(),
         Math.PI*radius*radius,
-        // Math.PI*(4/3)*radius*radius*radius,
         radius,
         tinycolor.random().darken(0.9).toRgbString()
       )
@@ -57,7 +56,7 @@ export default class Game {
   }
   tick(){
     let bodys: Array<Body> = [...this.balls,...this.planets]
-    this.renderer.render(bodys)
+    this.renderer.render(bodys,this.balls.length)
 
     this.balls.forEach(
       b=>b.update(this.planets, this.balls)

@@ -12,31 +12,23 @@ export default class Control {
   constructor(canvas: HTMLCanvasElement,game:Game) {
     this.canvas = canvas
     this.game = game
-    //start
-    // canvas.addEventListener('ontouchstart',(e)=>{
-      // console.log("startdrag")
-      // this.startDrag = new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
-      // console.log(this.startDrag)
-      // e.preventDefault()
-    // })
+
     canvas.ontouchstart = (e)=>{
-      console.log("startdrag")
-      this.startDrag = new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
+      this.startDrag = this.getXY(e)
       console.log(this.startDrag)
       e.preventDefault()
     }
 
-
     canvas.onmousedown = (e)=>{
-      this.startDrag = new Victor(e.offsetX,e.offsetY)
+      this.startDrag = this.getXY(e)
     }
     //move
     document.ontouchmove = (e)=>{
-      this.mousePos = new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
+      this.mousePos = this.getXY(e)//new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
       e.preventDefault()
     }
     document.body.onmousemove = (e)=>{
-      this.mousePos = new Victor(e.clientX-this.canvas.offsetLeft,e.clientY-this.canvas.offsetTop)
+      this.mousePos = this.getXY(e)
     }
     //end
     document.body.ontouchend = (e)=>{
@@ -48,6 +40,20 @@ export default class Control {
       this.game.launch(this.startDrag,this.mousePos)
       this.startDrag = undefined
     }
+  }
+  getXY(e){
+    let clientP: Victor
+    if(e.touches){
+      clientP = new Victor(e.touches[0].clientX, e.touches[1].clientY)
+    }else{
+      clientP = new Victor(e.clientX, e.clientY)
+    }
+    let rect = this.canvas.getBoundingClientRect() /// get absolute rect. of canvas
+    let offset = new Victor(rect.left,rect.top)
+    let scale = new Victor((Universals.bounds.x/this.canvas.scrollWidth), (Universals.bounds.y/this.canvas.scrollHeight))
+    clientP.subtract(offset)
+    clientP.multiply(scale)
+    return clientP                         /// return object
   }
 
 

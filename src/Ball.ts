@@ -18,7 +18,7 @@ export default class Ball {
               teamon: team) {
 
     let isBoccino = teamon == team.boccino
-    let radius = isBoccino ? 9 : 15
+    let radius = isBoccino ? 5 : 9
     let color:string
     switch(teamon){
      case(team.boccino):
@@ -42,9 +42,9 @@ export default class Ball {
   getClosestWall(){
 
    let wallpoints: Array<Victor> = [(new Victor(this.position.x,0)),
-                                   (new Victor(this.position.x,Universals.width)),
+                                   (new Victor(this.position.x,Universals.bounds.y)),
                                    (new Victor(0,this.position.y)),
-                                   (new Victor(Universals.width,this.position.y))]
+                                   (new Victor(Universals.bounds.x,this.position.y))]
 
    let closestwall = wallpoints.reduce((min,wp)=>{
      if(this.position.distance(wp)<this.position.distance(min)){
@@ -82,7 +82,7 @@ export default class Ball {
                     .normalize()
                     .multiplyScalar(force)
                   )
-    if(seperation(this, planet) < 0.1){
+    if(seperation(this, planet) < 1){
         forceAcc = new Victor(0,0);
         break;
     }
@@ -91,14 +91,17 @@ export default class Ball {
       forceAcc.multiplyScalar(Universals.delta / this.mass)
     )
     //apply update
-    this.velocity.limit(1000,.1)
-    this.velocity.limit(500,.2)
-    this.velocity.limit(400,.5)
-    this.velocity.limit(250,.9)
+    if(this.velocity.length()>200){
+      this.velocity.limit(Infinity,200/this.velocity.length())
+      console.log(this.velocity.length())
+    }
+    if(this.velocity.length()>175){
+      this.velocity.multiplyScalar(0.9)
+    }
+
     this.position.add(
       this.velocity.clone().multiplyScalar(Universals.delta)
     )
-
     if(this.position.distance(this.getClosestWall())<this.radius){
       this.simpleBounce(this.getClosestWall(), 0.1)
     }

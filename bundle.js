@@ -65,8 +65,8 @@
 	;
 	var initCanvas = function () {
 	    var canvas = document.createElement("canvas");
-	    canvas.width = Universals_1.default.width;
-	    canvas.height = Universals_1.default.height;
+	    canvas.width = Universals_1.default.bounds.x;
+	    canvas.height = Universals_1.default.bounds.y;
 	    var ctx = canvas.getContext("2d");
 	    document.body.appendChild(canvas);
 	    var renderer = new Render_1.default(ctx);
@@ -88,35 +88,45 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var Ball_1 = __webpack_require__(6);
 	var Universals_1 = __webpack_require__(3);
 	var tinycolor = __webpack_require__(4);
+	var Victor = __webpack_require__(7);
+	var team;
+	(function (team) {
+	    team[team["boccino"] = 0] = "boccino";
+	    team[team["red"] = 1] = "red";
+	    team[team["green"] = 2] = "green";
+	})(team || (team = {}));
+	;
 	var Renderer = (function () {
 	    function Renderer(ctx) {
 	        this.ctx = ctx;
 	    }
-	    Renderer.prototype.render = function (balls) {
+	    Renderer.prototype.render = function (bodys, shots) {
 	        this.ctx.fillStyle = "hsla(180, 0% ,10%,0.5)";
-	        this.ctx.fillRect(0, 0, Universals_1.default.width, Universals_1.default.height);
-	        for (var i in balls) {
-	            var ball = balls[i];
+	        this.ctx.fillRect(0, 0, Universals_1.default.bounds.x, Universals_1.default.bounds.y);
+	        var allBalls = bodys.concat(this.hudBalls(9 - shots));
+	        for (var i in allBalls) {
+	            var ball = allBalls[i];
 	            this.renderBall(ball);
 	        }
 	        this.renderShot();
 	    };
-	    Renderer.prototype.renderBall = function (ball) {
-	        var lgrd = this.ctx.createLinearGradient(ball.position.x - ball.radius, ball.position.y - ball.radius, ball.position.x + ball.radius, ball.position.y + ball.radius);
-	        var rgrd = this.ctx.createRadialGradient(ball.position.x, ball.position.y, 0, ball.position.x, ball.position.y, ball.radius);
-	        rgrd.addColorStop(0.1, tinycolor(ball.color).toRgbString());
-	        rgrd.addColorStop(1, tinycolor(ball.color).spin(50).darken(20).toRgbString());
-	        lgrd.addColorStop(0, tinycolor(ball.color).darken(100).setAlpha(0.7).toRgbString());
-	        lgrd.addColorStop(1, tinycolor(ball.color).lighten(100).setAlpha(0.7).toRgbString());
+	    Renderer.prototype.renderBall = function (body) {
+	        var lgrd = this.ctx.createLinearGradient(body.position.x - body.radius, body.position.y - body.radius, body.position.x + body.radius, body.position.y + body.radius);
+	        var rgrd = this.ctx.createRadialGradient(body.position.x, body.position.y, 0, body.position.x, body.position.y, body.radius);
+	        rgrd.addColorStop(0.1, tinycolor(body.color).toRgbString());
+	        rgrd.addColorStop(1, tinycolor(body.color).spin(50).darken(20).toRgbString());
+	        lgrd.addColorStop(0, tinycolor(body.color).darken(100).setAlpha(0.7).toRgbString());
+	        lgrd.addColorStop(1, tinycolor(body.color).lighten(100).setAlpha(0.7).toRgbString());
 	        this.ctx.fillStyle = rgrd;
 	        this.ctx.beginPath();
-	        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
+	        this.ctx.arc(body.position.x, body.position.y, body.radius, 0, 180);
 	        this.ctx.fill();
 	        this.ctx.fillStyle = lgrd;
 	        this.ctx.beginPath();
-	        this.ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, 180);
+	        this.ctx.arc(body.position.x, body.position.y, body.radius, 0, 180);
 	        this.ctx.fill();
 	    };
 	    Renderer.prototype.renderShot = function () {
@@ -133,12 +143,18 @@
 	            this.ctx.fill();
 	        }
 	    };
-	    Renderer.prototype.renderHUD = function (nleft) {
-	        var left = [];
-	        // [team.boccino]?
-	        for (var i = 0; i < nleft; i++) {
-	            left.push();
+	    Renderer.prototype.hudBalls = function (nleft) {
+	        var left = [team.boccino];
+	        var i = 0;
+	        while (i < 4) {
+	            i++;
+	            left.push(team.red);
+	            left.push(team.green);
 	        }
+	        var balls = left.slice(9 - nleft).map(function (team, i) {
+	            return new Ball_1.default(new Victor(10 + (i * 20), 12), new Victor(0, 0), team);
+	        });
+	        return balls;
 	    };
 	    return Renderer;
 	}());
@@ -152,11 +168,11 @@
 
 	"use strict";
 	var tinycolor = __webpack_require__(4);
+	var Victor = __webpack_require__(7);
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = {
 	    delta: 0.1,
-	    width: 800,
-	    height: 800,
+	    bounds: new Victor(800, 800),
 	    teamColors: {
 	        "boccino": 'white',
 	        "red": tinycolor('red').toRgbString(),
@@ -1388,28 +1404,26 @@
 	    function Game(renderer) {
 	        this.renderer = renderer;
 	        this.balls = [];
-	        this.planets = this.genPlanets(60000);
+	        this.planets = this.genPlanets();
 	    }
 	    Game.prototype.newGame = function () {
 	        this.balls = [];
-	        this.planets = this.genPlanets(60000);
+	        this.planets = this.genPlanets();
 	    };
 	    Game.prototype.randomPoint = function () {
 	        var e = 190;
 	        var p = new Victor(0, 0);
-	        p.randomize(new Victor(e, e), new Victor(Universals_1.default.width - e, Universals_1.default.height - e));
-	        // return new Victor(Math.random()*Universals.width,
-	        // Math.random()*Universals.height)
+	        p.randomize(new Victor(e, e), new Victor(Universals_1.default.bounds.x - e, Universals_1.default.bounds.y - e));
 	        return p;
 	    };
-	    Game.prototype.genPlanets = function (n) {
+	    Game.prototype.genPlanets = function () {
+	        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .3;
+	        var on = n;
 	        var planets = [];
-	        var fuse = 1000;
+	        var fuse = 10000;
 	        var _loop_1 = function() {
-	            var radius = Math.random() * 140 * (n / 60000) + 40;
-	            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, 
-	            // Math.PI*(4/3)*radius*radius*radius,
-	            radius, tinycolor.random().darken(0.9).toRgbString());
+	            var radius = Math.random() * 100 * (n / on) + 30;
+	            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
 	            var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
 	            if (Math.min.apply(Math, distances) > 100) {
 	                n -= (radius * radius * Math.PI);
@@ -1429,7 +1443,7 @@
 	    Game.prototype.tick = function () {
 	        var _this = this;
 	        var bodys = this.balls.concat(this.planets);
-	        this.renderer.render(bodys);
+	        this.renderer.render(bodys, this.balls.length);
 	        this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
 	    };
 	    Game.prototype.launch = function (start, end) {
@@ -1476,7 +1490,7 @@
 	var Ball = (function () {
 	    function Ball(position, velocity, teamon) {
 	        var isBoccino = teamon == team.boccino;
-	        var radius = isBoccino ? 9 : 15;
+	        var radius = isBoccino ? 5 : 9;
 	        var color;
 	        switch (teamon) {
 	            case (team.boccino):
@@ -1498,9 +1512,9 @@
 	    Ball.prototype.getClosestWall = function () {
 	        var _this = this;
 	        var wallpoints = [(new Victor(this.position.x, 0)),
-	            (new Victor(this.position.x, Universals_1.default.width)),
+	            (new Victor(this.position.x, Universals_1.default.bounds.y)),
 	            (new Victor(0, this.position.y)),
-	            (new Victor(Universals_1.default.width, this.position.y))];
+	            (new Victor(Universals_1.default.bounds.x, this.position.y))];
 	        var closestwall = wallpoints.reduce(function (min, wp) {
 	            if (_this.position.distance(wp) < _this.position.distance(min)) {
 	                return wp;
@@ -1532,17 +1546,20 @@
 	                .subtract(this.position)
 	                .normalize()
 	                .multiplyScalar(force));
-	            if (Body_1.seperation(this, planet) < 0.1) {
+	            if (Body_1.seperation(this, planet) < 1) {
 	                forceAcc = new Victor(0, 0);
 	                break;
 	            }
 	        }
 	        this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
 	        //apply update
-	        this.velocity.limit(1000, .1);
-	        this.velocity.limit(500, .2);
-	        this.velocity.limit(400, .5);
-	        this.velocity.limit(250, .9);
+	        if (this.velocity.length() > 200) {
+	            this.velocity.limit(Infinity, 200 / this.velocity.length());
+	            console.log(this.velocity.length());
+	        }
+	        if (this.velocity.length() > 175) {
+	            this.velocity.multiplyScalar(0.9);
+	        }
 	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
 	        if (this.position.distance(this.getClosestWall()) < this.radius) {
 	            this.simpleBounce(this.getClosestWall(), 0.1);
@@ -2972,35 +2989,28 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var Universals_1 = __webpack_require__(3);
 	var Victor = __webpack_require__(7);
 	var Control = (function () {
 	    function Control(canvas, game) {
 	        var _this = this;
 	        this.canvas = canvas;
 	        this.game = game;
-	        //start
-	        // canvas.addEventListener('ontouchstart',(e)=>{
-	        // console.log("startdrag")
-	        // this.startDrag = new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
-	        // console.log(this.startDrag)
-	        // e.preventDefault()
-	        // })
 	        canvas.ontouchstart = function (e) {
-	            console.log("startdrag");
-	            _this.startDrag = new Victor(e.touches[0].clientX - _this.canvas.offsetLeft, e.touches[0].clientY - _this.canvas.offsetTop);
+	            _this.startDrag = _this.getXY(e);
 	            console.log(_this.startDrag);
 	            e.preventDefault();
 	        };
 	        canvas.onmousedown = function (e) {
-	            _this.startDrag = new Victor(e.offsetX, e.offsetY);
+	            _this.startDrag = _this.getXY(e);
 	        };
 	        //move
 	        document.ontouchmove = function (e) {
-	            _this.mousePos = new Victor(e.touches[0].clientX - _this.canvas.offsetLeft, e.touches[0].clientY - _this.canvas.offsetTop);
+	            _this.mousePos = _this.getXY(e); //new Victor(e.touches[0].clientX-this.canvas.offsetLeft,e.touches[0].clientY-this.canvas.offsetTop)
 	            e.preventDefault();
 	        };
 	        document.body.onmousemove = function (e) {
-	            _this.mousePos = new Victor(e.clientX - _this.canvas.offsetLeft, e.clientY - _this.canvas.offsetTop);
+	            _this.mousePos = _this.getXY(e);
 	        };
 	        //end
 	        document.body.ontouchend = function (e) {
@@ -3013,6 +3023,21 @@
 	            _this.startDrag = undefined;
 	        };
 	    }
+	    Control.prototype.getXY = function (e) {
+	        var clientP;
+	        if (e.touches) {
+	            clientP = new Victor(e.touches[0].clientX, e.touches[1].clientY);
+	        }
+	        else {
+	            clientP = new Victor(e.clientX, e.clientY);
+	        }
+	        var rect = this.canvas.getBoundingClientRect(); /// get absolute rect. of canvas
+	        var offset = new Victor(rect.left, rect.top);
+	        var scale = new Victor((Universals_1.default.bounds.x / this.canvas.scrollWidth), (Universals_1.default.bounds.y / this.canvas.scrollHeight));
+	        clientP.subtract(offset);
+	        clientP.multiply(scale);
+	        return clientP; /// return object
+	    };
 	    return Control;
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
