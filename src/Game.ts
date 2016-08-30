@@ -4,9 +4,10 @@ import Ball from "./Ball";
 import Planet from "./Planet";
 import {Body,seperation} from "./Body";
 import Victor = require('victor')
-// import tinycolor from 'tinycolor2';
 import tinycolor = require('tinycolor2');
-// let t = tinycolor
+
+enum team {"boccino", "red", "green"};
+
 export default class Game {
 
   public renderer: Renderer
@@ -32,9 +33,8 @@ export default class Game {
     return p
   }
   genPlanets(n){
-    // console.log(tinycolor)
-    // debugger
     let planets = []
+    let fuse = 1000
     while(n>0){
       let radius = Math.random()*140*(n/60000) + 40
       let newPlanet = new Planet(
@@ -45,17 +45,18 @@ export default class Game {
         tinycolor.random().darken(0.9).toRgbString()
       )
       let distances = planets.map(p=>seperation(newPlanet,p))
-      if(Math.min(...distances)<100){
-        // n+=(radius*radius*Math.PI)
-      }else{
+      if(Math.min(...distances)>100){
         n-=(radius*radius*Math.PI)
         planets.push(newPlanet)
       }
+      fuse--
+      if(fuse<0)
+        break
     }
     return planets
   }
   tick(){
-    let bodys: Array<Body> = [...this.balls,...this.planets]//this.balls.concat(this.planets)
+    let bodys: Array<Body> = [...this.balls,...this.planets]
     this.renderer.render(bodys)
 
     this.balls.forEach(
@@ -64,24 +65,27 @@ export default class Game {
   }
   launch(start:Victor,end:Victor){
     let isBoccino = this.balls.length ==0
-    let radius = isBoccino ? 9 : 15
-    let color:string = isBoccino ? tinycolor('white').toRgbString()
-                          : tinycolor('red').toRgbString()
+    let type:team = team.boccino
     if(!isBoccino){
-      color = this.balls.length%2 ? tinycolor('red').toRgbString()
-                                         : tinycolor('green').toRgbString()
-
+      type = this.balls.length%2? team.red: team.green
     }
+
     let launched: Ball = new Ball(
       start,
       start.clone().subtract(end).multiplyScalar(0.65),
-      radius*radius*Math.PI,
-      radius,
-      color
+      type
     )
     this.balls.push(launched)
     if(this.balls.length===10){
       this.newGame()
     }
+  }
+  score(){
+    let boccino = this.balls[0]
+    let balls = this.balls.slice(1)
+    balls.map(ball=>{
+      return ball.position.distance(boccino.position)
+    })
+
   }
 }

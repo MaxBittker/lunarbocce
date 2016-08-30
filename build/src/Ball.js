@@ -3,17 +3,32 @@ var Victor = require('victor');
 var Universals_1 = require("./Universals");
 var Body_1 = require("./Body");
 var Sound_1 = require("./Sound");
-var bodyType;
-(function (bodyType) {
-    bodyType[bodyType["Ball"] = 0] = "Ball";
-    bodyType[bodyType["Planet"] = 1] = "Planet";
-})(bodyType || (bodyType = {}));
+var team;
+(function (team) {
+    team[team["boccino"] = 0] = "boccino";
+    team[team["red"] = 1] = "red";
+    team[team["green"] = 2] = "green";
+})(team || (team = {}));
 ;
 var Ball = (function () {
-    function Ball(position, velocity, mass, radius, color) {
+    function Ball(position, velocity, teamon) {
+        var isBoccino = teamon == team.boccino;
+        var radius = isBoccino ? 9 : 15;
+        var color;
+        switch (teamon) {
+            case (team.boccino):
+                color = Universals_1.default.teamColors.boccino;
+                break;
+            case (team.red):
+                color = Universals_1.default.teamColors.red;
+                break;
+            case (team.green):
+                color = Universals_1.default.teamColors.green;
+                break;
+        }
         this.position = position;
         this.velocity = velocity;
-        this.mass = mass;
+        this.mass = radius * radius * Math.PI;
         this.radius = radius;
         this.color = color;
     }
@@ -60,6 +75,10 @@ var Ball = (function () {
             }
         }
         this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
+        this.velocity.limit(1000, .1);
+        this.velocity.limit(500, .2);
+        this.velocity.limit(400, .5);
+        this.velocity.limit(250, .9);
         this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
         if (this.position.distance(this.getClosestWall()) < this.radius) {
             this.simpleBounce(this.getClosestWall(), 0.1);

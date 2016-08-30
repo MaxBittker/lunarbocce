@@ -72,4 +72,14 @@ export default class Renderer {
       0,180)
     this.ctx.fill()}
   }
+  renderHUD(nleft){
+    let left = []
+    // [team.boccino]?
+    for(var i=0;i<nleft;i++){
+      left.push(
+        // teamZ
+      )
+    }
+
+  }
 }

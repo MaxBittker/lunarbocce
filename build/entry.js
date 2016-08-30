@@ -3,6 +3,13 @@ var Render_1 = require("./src/Render");
 var Game_1 = require("./src/Game");
 var Universals_1 = require("./src/Universals");
 var Control_1 = require("./src/Control");
+var team;
+(function (team) {
+    team[team["boccino"] = 0] = "boccino";
+    team[team["red"] = 1] = "red";
+    team[team["green"] = 2] = "green";
+})(team || (team = {}));
+;
 var initCanvas = function () {
     var canvas = document.createElement("canvas");
     canvas.width = Universals_1.default.width;

@@ -44,6 +44,12 @@ var Renderer = (function () {
             this.ctx.fill();
         }
     };
+    Renderer.prototype.renderHUD = function (nleft) {
+        var left = [];
+        for (var i = 0; i < nleft; i++) {
+            left.push();
+        }
+    };
     return Renderer;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });

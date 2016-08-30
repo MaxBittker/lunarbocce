@@ -2,9 +2,7 @@ import Victor = require('victor')
 import Universals from "./Universals";
 import {Body,seperation} from "./Body";
 import playSound from "./Sound";
-enum bodyType {Ball, Planet};
-
-
+enum team {"boccino", "red", "green"};
 
 export default class Ball {
 
@@ -17,14 +15,29 @@ export default class Ball {
 
   constructor(position: Victor,
               velocity: Victor,
-              mass: number,
-              radius: number,
-              color: string) {
+              teamon: team) {
+
+    let isBoccino = teamon == team.boccino
+    let radius = isBoccino ? 9 : 15
+    let color:string
+    switch(teamon){
+     case(team.boccino):
+      color = Universals.teamColors.boccino
+     break;
+     case(team.red):
+      color = Universals.teamColors.red
+     break;
+     case(team.green):
+      color = Universals.teamColors.green
+     break;
+    }
+
     this.position = position
     this.velocity = velocity
-    this.mass = mass
+    this.mass = radius*radius*Math.PI
     this.radius = radius
     this.color = color
+
   }
   getClosestWall(){
 
@@ -78,6 +91,10 @@ export default class Ball {
       forceAcc.multiplyScalar(Universals.delta / this.mass)
     )
     //apply update
+    this.velocity.limit(1000,.1)
+    this.velocity.limit(500,.2)
+    this.velocity.limit(400,.5)
+    this.velocity.limit(250,.9)
     this.position.add(
       this.velocity.clone().multiplyScalar(Universals.delta)
     )
