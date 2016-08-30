@@ -241,7 +241,7 @@
 	var Ball = (function () {
 	    function Ball(position, velocity, teamon) {
 	        var isBoccino = teamon == team.boccino;
-	        var radius = isBoccino ? 5 : 9;
+	        var radius = isBoccino ? 8 : 12;
 	        var color;
 	        switch (teamon) {
 	            case (team.boccino):
@@ -312,7 +312,7 @@
 	        if (this.velocity.length() > 175) {
 	            this.velocity.multiplyScalar(0.9);
 	        }
-	        if (this.velocity.length() < 8 && friction) {
+	        if (this.velocity.length() < 9 && friction) {
 	            this.velocity.multiplyScalar(0);
 	        }
 	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));

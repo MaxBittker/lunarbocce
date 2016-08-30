@@ -18,7 +18,7 @@ export default class Ball {
               velocity: Victor,
               teamon: team) {
     let isBoccino = teamon == team.boccino
-    let radius = isBoccino ? 5 : 9
+    let radius = isBoccino ? 8 : 12
     let color:string
     switch(teamon){
      case(team.boccino):
@@ -100,7 +100,7 @@ export default class Ball {
     if(this.velocity.length()>175){
       this.velocity.multiplyScalar(0.9)
     }
-    if(this.velocity.length()<8 && friction){
+    if(this.velocity.length()<9 && friction){
       this.velocity.multiplyScalar(0)
     }
 
