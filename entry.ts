@@ -5,8 +5,7 @@ import Universals from "./src/Universals";
 import Control from "./src/Control";
 import Victor = require('victor')
 import tinycolor = require('tinycolor2');
-enum team {"boccino", "red", "green"};
-
+declare var team: {"boccino":string, "red":string, "green":string};
 
 const initCanvas = ()=> {
   let canvas = document.createElement("canvas");

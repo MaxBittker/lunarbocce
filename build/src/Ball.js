@@ -31,6 +31,7 @@ var Ball = (function () {
         this.mass = radius * radius * Math.PI;
         this.radius = radius;
         this.color = color;
+        this.teamon = teamon;
     }
     Ball.prototype.getClosestWall = function () {
         var _this = this;
@@ -56,7 +57,7 @@ var Ball = (function () {
         var mtd = delta.clone().multiplyScalar(((this.radius + radius) - d) / d);
         this.position.add(mtd);
         this.velocity.multiplyScalar(0.6);
-        Sound_1.default(this.velocity.length() / 50);
+        Sound_1.playSound(this.velocity.length() / 50);
     };
     Ball.prototype.update = function (planets, balls) {
         var forceAcc = new Victor(0, 0);
@@ -111,7 +112,7 @@ var Ball = (function () {
                 var impulse = mtd.clone().multiplyScalar(i);
                 this.velocity.add(impulse.clone().multiplyScalar(im1));
                 ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
-                Sound_1.default(impulse.length() / 5000);
+                Sound_1.playSound(impulse.length() / 5000);
             }
         }
     };

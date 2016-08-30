@@ -12,29 +12,37 @@ var team;
     team[team["green"] = 2] = "green";
 })(team || (team = {}));
 ;
+var stage;
+(function (stage) {
+    stage[stage["play"] = 0] = "play";
+    stage[stage["score"] = 1] = "score";
+    stage[stage["waiting"] = 2] = "waiting";
+})(stage || (stage = {}));
+;
 var Game = (function () {
     function Game(renderer) {
+        this.newGame();
         this.renderer = renderer;
-        this.balls = [];
-        this.planets = this.genPlanets();
+        this.animTick = 0;
     }
     Game.prototype.newGame = function () {
+        this.stage = stage.play;
         this.balls = [];
         this.planets = this.genPlanets();
     };
     Game.prototype.randomPoint = function () {
         var e = 190;
         var p = new Victor(0, 0);
-        p.randomize(new Victor(e, e), new Victor(Universals_1.default.bounds.x - e, Universals_1.default.bounds.y - e));
+        p.randomize(new Victor(e, (e / 2)), new Victor(Universals_1.default.bounds.x - (e / 2), Universals_1.default.bounds.y - e));
         return p;
     };
     Game.prototype.genPlanets = function () {
-        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .3;
+        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .25;
         var on = n;
         var planets = [];
         var fuse = 10000;
         var _loop_1 = function() {
-            var radius = Math.random() * 100 * (n / on) + 30;
+            var radius = Math.random() * 130 * (n / on) + 30;
             var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) > 100) {
@@ -56,7 +64,16 @@ var Game = (function () {
         var _this = this;
         var bodys = this.balls.concat(this.planets);
         this.renderer.render(bodys, this.balls.length);
-        this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
+        if (this.stage === stage.play) {
+            this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
+        }
+        if (this.stage === stage.score || this.stage === stage.waiting) {
+            var done = this.renderer.renderScore(this.balls[0], this.score(), this.animTick);
+            this.animTick++;
+            if (done) {
+                this.stage = stage.waiting;
+            }
+        }
     };
     Game.prototype.launch = function (start, end) {
         var isBoccino = this.balls.length == 0;
@@ -64,18 +81,31 @@ var Game = (function () {
         if (!isBoccino) {
             type = this.balls.length % 2 ? team.red : team.green;
         }
-        var launched = new Ball_1.default(start, start.clone().subtract(end).multiplyScalar(0.65), type);
-        this.balls.push(launched);
-        if (this.balls.length === 10) {
-            this.newGame();
+        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
+        if (this.balls.length == 9) {
+            if (this.stage === stage.waiting) {
+                this.newGame();
+            }
+            else if (this.stage === stage.play) {
+                this.stage = stage.score;
+                this.animTick = 0;
+            }
+            return;
         }
+        this.balls.push(launched);
     };
     Game.prototype.score = function () {
         var boccino = this.balls[0];
         var balls = this.balls.slice(1);
-        balls.map(function (ball) {
-            return ball.position.distance(boccino.position);
-        });
+        var distances = balls.map(function (ball) {
+            return { d: ball.position.distance(boccino.position), ball: ball };
+        }).sort(function (a, b) { return a.d - b.d; });
+        var winnerTeam = distances[0].ball.teamon;
+        for (var i = 0; i < distances.length; i++) {
+            if (distances[i].ball.teamon != winnerTeam)
+                return (distances.slice(0, i + 1));
+        }
+        throw ("?");
     };
     return Game;
 }());

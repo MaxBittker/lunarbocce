@@ -1,7 +1,7 @@
 import Victor = require('victor')
 import Universals from "./Universals";
 import {Body,seperation} from "./Body";
-import playSound from "./Sound";
+import {playSound} from "./Sound";
 enum team {"boccino", "red", "green"};
 
 export default class Ball {
@@ -11,12 +11,12 @@ export default class Ball {
   public mass: number;
   public radius: number;
   public color: string;
+  public teamon: team
 
 
   constructor(position: Victor,
               velocity: Victor,
               teamon: team) {
-
     let isBoccino = teamon == team.boccino
     let radius = isBoccino ? 5 : 9
     let color:string
@@ -37,6 +37,7 @@ export default class Ball {
     this.mass = radius*radius*Math.PI
     this.radius = radius
     this.color = color
+    this.teamon = teamon
 
   }
   getClosestWall(){
