@@ -118,7 +118,7 @@ var Ball = (function () {
                 if (vn > 0) {
                     continue;
                 }
-                var i = (-(0.7) * vn) / (im1 + im2);
+                var i = (-(0.6) * vn) / (im1 + im2);
                 var impulse = mtd.clone().multiplyScalar(i);
                 this.velocity.add(impulse.clone().multiplyScalar(im1));
                 ball.velocity.subtract(impulse.clone().multiplyScalar(im2));

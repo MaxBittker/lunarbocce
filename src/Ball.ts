@@ -148,7 +148,7 @@ export default class Ball {
         if (vn > 0){
           continue;
         }
-          let i:number = (-(0.7) * vn) / (im1 + im2);
+          let i:number = (-(0.6) * vn) / (im1 + im2);
           let impulse:Victor = mtd.clone().multiplyScalar(i);
           this.velocity.add(impulse.clone().multiplyScalar(im1));
           ball.velocity.subtract(impulse.clone().multiplyScalar(im2))
