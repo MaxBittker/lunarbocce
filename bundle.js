@@ -178,7 +178,7 @@
 	        this.ctx.font = "30px 'Helvetica'";
 	        this.ctx.textBaseline = 'alphabetic';
 	        // this.ctx.scale(1,1);
-	        animTick /= 1.5;
+	        // animTick/=1
 	        var done = true;
 	        var rate = 1;
 	        for (var i = 0; i < scoreBalls.length; i++) {
@@ -206,9 +206,10 @@
 	            animTick -= r;
 	            this.ctx.lineCap = "round";
 	            this.ctx.lineWidth = 1;
-	            this.ctx.setLineDash([3, 10]);
+	            this.ctx.setLineDash([2, 10]);
 	            this.ctx.beginPath();
-	            this.ctx.arc(boccino.position.x, boccino.position.y, r, 0, 180);
+	            var offset = r / (Math.PI * 16);
+	            this.ctx.arc(boccino.position.x, boccino.position.y, r, 0 + offset, 180 + offset);
 	            this.ctx.stroke();
 	        }
 	        if (!done) {
@@ -303,6 +304,9 @@
 	                friction = true;
 	            }
 	        }
+	        if (this.velocity.length() < 12 && friction) {
+	            forceAcc.multiplyScalar(0.1);
+	        }
 	        this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
 	        //apply update
 	        if (this.velocity.length() > 200) {
@@ -312,13 +316,17 @@
 	        if (this.velocity.length() > 175) {
 	            this.velocity.multiplyScalar(0.9);
 	        }
-	        if (this.velocity.length() < 9 && friction) {
+	        if (this.velocity.length() < 2 && friction) {
 	            this.velocity.multiplyScalar(0);
 	        }
-	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
 	        if (this.position.distance(this.getClosestWall()) < this.radius) {
 	            this.simpleBounce(this.getClosestWall(), 0.1);
 	        }
+	        var center = Universals_1.default.bounds.clone().multiplyScalar(0.5);
+	        if (this.position.distance(center) > this.getClosestWall().distance(center)) {
+	            this.position.subtract(this.position.clone().subtract(this.getClosestWall()));
+	        }
+	        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
 	        for (var p in planets) {
 	            var planet = planets[p];
 	            if (Body_1.seperation(this, planet) < 0) {
@@ -345,13 +353,14 @@
 	                if (vn > 0) {
 	                    continue;
 	                }
-	                var i = (-(0.6) * vn) / (im1 + im2);
+	                var i = (-(0.7) * vn) / (im1 + im2);
 	                var impulse = mtd.clone().multiplyScalar(i);
 	                this.velocity.add(impulse.clone().multiplyScalar(im1));
 	                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
 	                Sound_1.playSound(impulse.length() / 5000);
 	            }
 	        }
+	        return (this.velocity.length() < 1);
 	    };
 	    return Ball;
 	}());
@@ -1706,7 +1715,7 @@
 	        "red": tinycolor('red').toRgbString(),
 	        "green": tinycolor('green').toRgbString(),
 	    },
-	    launchPos: new Victor(60, bounds.y - 60)
+	    launchPos: new Victor(80, bounds.y - 80)
 	};
 
 
@@ -3009,12 +3018,12 @@
 	        return p;
 	    };
 	    Game.prototype.genPlanets = function () {
-	        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .25;
+	        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .15;
 	        var on = n;
 	        var planets = [];
 	        var fuse = 10000;
 	        var _loop_1 = function() {
-	            var radius = Math.random() * 130 * (n / on) + 30;
+	            var radius = Math.random() * 140 * (n / on) + 40;
 	            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
 	            var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
 	            if (Math.min.apply(Math, distances) > 100) {
@@ -3038,7 +3047,11 @@
 	        this.renderer.render(bodys, this.balls.length);
 	        this.renderer.renderHUD(this.points);
 	        if (this.stage === stage.play) {
-	            this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
+	            var settle = this.balls.map(function (b) { return b.update(_this.planets, _this.balls); });
+	            if (this.stage === stage.play && this.balls.length === 9 && settle.every(function (i) { return i; })) {
+	                this.stage = stage.score;
+	                this.animTick = 0;
+	            }
 	        }
 	        if (this.stage === stage.score || this.stage === stage.waiting) {
 	            var done = this.renderer.renderScore(this.balls[0], this.score(), this.animTick);
@@ -3057,17 +3070,12 @@
 	            type = this.balls.length % 2 ? team.red : team.green;
 	        }
 	        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
-	        if (this.balls.length == 9) {
-	            if (this.stage === stage.waiting) {
-	                this.newGame();
-	            }
-	            else if (this.stage === stage.play) {
-	                this.stage = stage.score;
-	                this.animTick = 0;
-	            }
-	            return;
+	        if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {
+	            this.balls.push(launched);
 	        }
-	        this.balls.push(launched);
+	        else if (this.stage === stage.waiting) {
+	            this.newGame();
+	        }
 	    };
 	    Game.prototype.score = function () {
 	        var boccino = this.balls[0];

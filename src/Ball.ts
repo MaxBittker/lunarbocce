@@ -71,7 +71,7 @@ export default class Ball {
     this.velocity.multiplyScalar(0.6)
     playSound(this.velocity.length()/50)
   }
-  update(planets: Array<Body>, balls: Array<Body>) {
+  update(planets: Array<Body>, balls: Array<Body>):boolean {
     let forceAcc = new Victor(0,0)
     let friction = false
     for(let p in planets){
@@ -88,6 +88,9 @@ export default class Ball {
         friction = true
     }
   }
+    if(this.velocity.length()<12 && friction){
+      forceAcc.multiplyScalar(0.1)
+    }
     this.velocity.add(
       forceAcc.multiplyScalar(Universals.delta / this.mass)
     )
@@ -100,16 +103,22 @@ export default class Ball {
     if(this.velocity.length()>175){
       this.velocity.multiplyScalar(0.9)
     }
-    if(this.velocity.length()<9 && friction){
+    if(this.velocity.length()<2 && friction){
       this.velocity.multiplyScalar(0)
+    }
+    if(this.position.distance(this.getClosestWall())<this.radius){
+      this.simpleBounce(this.getClosestWall(), 0.1)
+    }
+    let center = Universals.bounds.clone().multiplyScalar(0.5)
+    if(this.position.distance(center)>this.getClosestWall().distance(center)){
+      this.position.subtract(
+        this.position.clone().subtract(this.getClosestWall())
+      )
     }
 
     this.position.add(
       this.velocity.clone().multiplyScalar(Universals.delta)
     )
-    if(this.position.distance(this.getClosestWall())<this.radius){
-      this.simpleBounce(this.getClosestWall(), 0.1)
-    }
 
     for(let p in planets){
       let planet = planets[p]
@@ -139,7 +148,7 @@ export default class Ball {
         if (vn > 0){
           continue;
         }
-          let i:number = (-(0.6) * vn) / (im1 + im2);
+          let i:number = (-(0.7) * vn) / (im1 + im2);
           let impulse:Victor = mtd.clone().multiplyScalar(i);
           this.velocity.add(impulse.clone().multiplyScalar(im1));
           ball.velocity.subtract(impulse.clone().multiplyScalar(im2))
@@ -147,5 +156,6 @@ export default class Ball {
 
       }
     }
+    return (this.velocity.length()<1)
   }
 }

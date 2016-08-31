@@ -38,12 +38,12 @@ export default class Game {
     return p
   }
   genPlanets(){
-    let n = Universals.bounds.x*Universals.bounds.y*.25
+    let n = Universals.bounds.x*Universals.bounds.y*.15
     let on = n
     let planets = []
     let fuse = 10000
     while(n>0){
-      let radius = Math.random()*130*(n/on) + 30
+      let radius = Math.random()*140*(n/on) + 40
       let newPlanet = new Planet(
         this.randomPoint(),
         Math.PI*radius*radius,
@@ -66,9 +66,11 @@ export default class Game {
       this.renderer.render(bodys,this.balls.length)
       this.renderer.renderHUD(this.points)
       if(this.stage===stage.play){
-        this.balls.forEach(
-          b=>b.update(this.planets, this.balls)
-        )
+        let settle = this.balls.map(b=>b.update(this.planets, this.balls))
+        if(this.stage===stage.play && this.balls.length===9 && settle.every(i=>i)){
+          this.stage= stage.score
+          this.animTick = 0
+        }
       }
       if(this.stage === stage.score || this.stage === stage.waiting){
         let done = this.renderer.renderScore(this.balls[0],this.score(),this.animTick)
@@ -93,16 +95,12 @@ export default class Game {
       start.clone().subtract(end).multiplyScalar(0.65),
       type
     )
-    if(this.balls.length==9){
-      if(this.stage===stage.waiting){
-        this.newGame()
-      }else if(this.stage===stage.play){
-        this.stage= stage.score
-        this.animTick = 0
-      }
-      return
+
+    if(this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length()>15)){
+      this.balls.push(launched)
+    }else if(this.stage===stage.waiting){
+      this.newGame()
     }
-    this.balls.push(launched)
   }
   score():Array<{d:number,ball:Ball}>{
     let boccino = this.balls[0]

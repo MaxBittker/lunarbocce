@@ -75,6 +75,9 @@ var Ball = (function () {
                 friction = true;
             }
         }
+        if (this.velocity.length() < 12 && friction) {
+            forceAcc.multiplyScalar(0.1);
+        }
         this.velocity.add(forceAcc.multiplyScalar(Universals_1.default.delta / this.mass));
         if (this.velocity.length() > 200) {
             this.velocity.limit(Infinity, 200 / this.velocity.length());
@@ -83,13 +86,17 @@ var Ball = (function () {
         if (this.velocity.length() > 175) {
             this.velocity.multiplyScalar(0.9);
         }
-        if (this.velocity.length() < 9 && friction) {
+        if (this.velocity.length() < 2 && friction) {
             this.velocity.multiplyScalar(0);
         }
-        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
         if (this.position.distance(this.getClosestWall()) < this.radius) {
             this.simpleBounce(this.getClosestWall(), 0.1);
         }
+        var center = Universals_1.default.bounds.clone().multiplyScalar(0.5);
+        if (this.position.distance(center) > this.getClosestWall().distance(center)) {
+            this.position.subtract(this.position.clone().subtract(this.getClosestWall()));
+        }
+        this.position.add(this.velocity.clone().multiplyScalar(Universals_1.default.delta));
         for (var p in planets) {
             var planet = planets[p];
             if (Body_1.seperation(this, planet) < 0) {
@@ -111,13 +118,14 @@ var Ball = (function () {
                 if (vn > 0) {
                     continue;
                 }
-                var i = (-(0.6) * vn) / (im1 + im2);
+                var i = (-(0.7) * vn) / (im1 + im2);
                 var impulse = mtd.clone().multiplyScalar(i);
                 this.velocity.add(impulse.clone().multiplyScalar(im1));
                 ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
                 Sound_1.playSound(impulse.length() / 5000);
             }
         }
+        return (this.velocity.length() < 1);
     };
     return Ball;
 }());

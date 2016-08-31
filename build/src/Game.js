@@ -40,12 +40,12 @@ var Game = (function () {
         return p;
     };
     Game.prototype.genPlanets = function () {
-        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .25;
+        var n = Universals_1.default.bounds.x * Universals_1.default.bounds.y * .15;
         var on = n;
         var planets = [];
         var fuse = 10000;
         var _loop_1 = function() {
-            var radius = Math.random() * 130 * (n / on) + 30;
+            var radius = Math.random() * 140 * (n / on) + 40;
             var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) > 100) {
@@ -69,7 +69,11 @@ var Game = (function () {
         this.renderer.render(bodys, this.balls.length);
         this.renderer.renderHUD(this.points);
         if (this.stage === stage.play) {
-            this.balls.forEach(function (b) { return b.update(_this.planets, _this.balls); });
+            var settle = this.balls.map(function (b) { return b.update(_this.planets, _this.balls); });
+            if (this.stage === stage.play && this.balls.length === 9 && settle.every(function (i) { return i; })) {
+                this.stage = stage.score;
+                this.animTick = 0;
+            }
         }
         if (this.stage === stage.score || this.stage === stage.waiting) {
             var done = this.renderer.renderScore(this.balls[0], this.score(), this.animTick);
@@ -88,17 +92,12 @@ var Game = (function () {
             type = this.balls.length % 2 ? team.red : team.green;
         }
         var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
-        if (this.balls.length == 9) {
-            if (this.stage === stage.waiting) {
-                this.newGame();
-            }
-            else if (this.stage === stage.play) {
-                this.stage = stage.score;
-                this.animTick = 0;
-            }
-            return;
+        if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {
+            this.balls.push(launched);
         }
-        this.balls.push(launched);
+        else if (this.stage === stage.waiting) {
+            this.newGame();
+        }
     };
     Game.prototype.score = function () {
         var boccino = this.balls[0];

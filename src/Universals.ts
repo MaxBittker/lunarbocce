@@ -11,5 +11,5 @@ export default {
     "red":  tinycolor('red').toRgbString(),
     "green": tinycolor('green').toRgbString(),
   },
-  launchPos: new Victor(60,bounds.y-60)
+  launchPos: new Victor(80,bounds.y-80)
 }

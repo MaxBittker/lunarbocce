@@ -142,7 +142,7 @@ export default class Renderer {
     this.ctx.textBaseline = 'alphabetic';
     // this.ctx.scale(1,1);
 
-    animTick/=1.5
+    // animTick/=1
     let done = true
     let rate = 1;
     for(var i=0; i<scoreBalls.length;i++){
@@ -165,24 +165,22 @@ export default class Renderer {
         this.ctx.lineCap="round";
         this.ctx.lineWidth = 1;
         this.ctx.setLineDash([]);
-
         this.ctx.fillText (mark, ball.position.x, ball.position.y);
         this.ctx.strokeText (mark, ball.position.x, ball.position.y);
-
       }
       animTick -= r
 
-
       this.ctx.lineCap="round";
       this.ctx.lineWidth = 1;
-      this.ctx.setLineDash([3, 10]);
+      this.ctx.setLineDash([2, 10]);
 
       this.ctx.beginPath()
+      let offset = r/(Math.PI*16)
       this.ctx.arc(
         boccino.position.x,
         boccino.position.y,
         r,
-        0,180)
+        0+offset,180+offset)
       this.ctx.stroke()
     }
     if(!done){

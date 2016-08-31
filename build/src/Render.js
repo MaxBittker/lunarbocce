@@ -93,7 +93,6 @@ var Renderer = (function () {
         this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         this.ctx.font = "30px 'Helvetica'";
         this.ctx.textBaseline = 'alphabetic';
-        animTick /= 1.5;
         var done = true;
         var rate = 1;
         for (var i = 0; i < scoreBalls.length; i++) {
@@ -121,9 +120,10 @@ var Renderer = (function () {
             animTick -= r;
             this.ctx.lineCap = "round";
             this.ctx.lineWidth = 1;
-            this.ctx.setLineDash([3, 10]);
+            this.ctx.setLineDash([2, 10]);
             this.ctx.beginPath();
-            this.ctx.arc(boccino.position.x, boccino.position.y, r, 0, 180);
+            var offset = r / (Math.PI * 16);
+            this.ctx.arc(boccino.position.x, boccino.position.y, r, 0 + offset, 180 + offset);
             this.ctx.stroke();
         }
         if (!done) {
