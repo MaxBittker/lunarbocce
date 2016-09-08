@@ -32,7 +32,7 @@ export default class Game {
     this.planets = this.genPlanets()
   }
   randomPoint(): Victor{
-    let e:number = 210
+    let e:number = 280
     let p:Victor = new Victor(0,0)
     p.randomize(new Victor(e,(e/2)), new Victor(Universals.bounds.x-(e/2),Universals.bounds.y-e))
     return p
@@ -43,7 +43,7 @@ export default class Game {
     let planets = []
     let fuse = 10000
     while(n>0){
-      let radius = Math.random()*140*(n/on) + 40
+      let radius = Math.random()*130*(n/on) + 60
       let newPlanet = new Planet(
         this.randomPoint(),
         Math.PI*radius*radius,
@@ -91,13 +91,16 @@ export default class Game {
       type = (this.balls.length+offset)%2 ? team.red: team.green
     }
 
+    let v:Victor = start.clone().subtract(end)//.multiplyScalar(0.65)
+    let mag = Math.min(90, v.length())
+
     let launched: Ball = new Ball(
       Universals.launchPos.clone(),
-      start.clone().subtract(end).multiplyScalar(0.65),
+      v.clone().normalize().multiplyScalar(mag),
       type
     )
 
-    if(this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length()>15)){
+    if(this.balls.length < 9 && (start.clone().subtract(end).length()>35)){
       this.balls.push(launched)
     }else if(this.stage===stage.waiting){
       this.newGame()

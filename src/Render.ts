@@ -67,7 +67,6 @@ export default class Renderer {
     this.ctx.beginPath()
     this.ctx.lineWidth = 3;
     this.ctx.setLineDash([6, 15]);
-
     this.ctx.arc(
       Universals.launchPos.x,
       Universals.launchPos.y,
@@ -79,14 +78,18 @@ export default class Renderer {
 
     let v:Victor = this.controls.startDrag.clone().subtract(this.controls.mousePos)
               .multiplyScalar(0.3)
-
+    let mag = Math.min(50, v.length())
     // this.ctx.fillStyle=tinycolor({ h: 230-(v.length()*3), l: 0.5, s: 0.5 }).setAlpha(0.2).toRgbString()
     this.ctx.fillStyle="rgba(200, 200, 200, 0.2)";
+    if((mag/0.3)<35){
+      this.ctx.fillStyle="rgba(200, 100, 100, 0.2)";
+
+    }
     this.ctx.strokeStyle="rgba(200, 200, 200, 0.2)";
-    this.ctx.lineWidth = v.length()/6;
+    this.ctx.lineWidth = mag/5;
     this.ctx.setLineDash([1]);
 
-    let endP:Victor = Universals.launchPos.clone().subtract(v)
+    let endP:Victor = Universals.launchPos.clone().subtract(v.clone().normalize().multiplyScalar(mag*1.5))
 
 
     this.ctx.beginPath()
@@ -98,7 +101,7 @@ export default class Renderer {
     this.ctx.arc(
       Universals.launchPos.x,
       Universals.launchPos.y,
-      this.controls.startDrag.distance(this.controls.mousePos)/5,
+      mag,
       0,180)
     this.ctx.fill()
     }

@@ -134,18 +134,22 @@
 	        if (this.controls.startDrag && this.controls.mousePos) {
 	            var v = this.controls.startDrag.clone().subtract(this.controls.mousePos)
 	                .multiplyScalar(0.3);
+	            var mag = Math.min(50, v.length());
 	            // this.ctx.fillStyle=tinycolor({ h: 230-(v.length()*3), l: 0.5, s: 0.5 }).setAlpha(0.2).toRgbString()
 	            this.ctx.fillStyle = "rgba(200, 200, 200, 0.2)";
+	            if ((mag / 0.3) < 35) {
+	                this.ctx.fillStyle = "rgba(200, 100, 100, 0.2)";
+	            }
 	            this.ctx.strokeStyle = "rgba(200, 200, 200, 0.2)";
-	            this.ctx.lineWidth = v.length() / 6;
+	            this.ctx.lineWidth = mag / 5;
 	            this.ctx.setLineDash([1]);
-	            var endP = Universals_1.default.launchPos.clone().subtract(v);
+	            var endP = Universals_1.default.launchPos.clone().subtract(v.clone().normalize().multiplyScalar(mag * 1.5));
 	            this.ctx.beginPath();
 	            this.ctx.moveTo(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y);
 	            this.ctx.lineTo(endP.x, endP.y);
 	            this.ctx.stroke();
 	            this.ctx.beginPath();
-	            this.ctx.arc(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y, this.controls.startDrag.distance(this.controls.mousePos) / 5, 0, 180);
+	            this.ctx.arc(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y, mag, 0, 180);
 	            this.ctx.fill();
 	        }
 	    };
@@ -359,7 +363,7 @@
 	                if (vn > 0) {
 	                    continue;
 	                }
-	                var i = (-(0.6) * vn) / (im1 + im2);
+	                var i = (-(0.5) * vn) / (im1 + im2);
 	                var impulse = mtd.clone().multiplyScalar(i);
 	                this.velocity.add(impulse.clone().multiplyScalar(im1));
 	                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
@@ -3018,7 +3022,7 @@
 	        this.planets = this.genPlanets();
 	    };
 	    Game.prototype.randomPoint = function () {
-	        var e = 210;
+	        var e = 280;
 	        var p = new Victor(0, 0);
 	        p.randomize(new Victor(e, (e / 2)), new Victor(Universals_1.default.bounds.x - (e / 2), Universals_1.default.bounds.y - e));
 	        return p;
@@ -3029,7 +3033,7 @@
 	        var planets = [];
 	        var fuse = 10000;
 	        var _loop_1 = function() {
-	            var radius = Math.random() * 140 * (n / on) + 40;
+	            var radius = Math.random() * 130 * (n / on) + 60;
 	            var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
 	            var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
 	            if (Math.min.apply(Math, distances) > 100) {
@@ -3076,8 +3080,10 @@
 	        if (!isBoccino) {
 	            type = (this.balls.length + offset) % 2 ? team.red : team.green;
 	        }
-	        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
-	        if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {
+	        var v = start.clone().subtract(end); //.multiplyScalar(0.65)
+	        var mag = Math.min(90, v.length());
+	        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), v.clone().normalize().multiplyScalar(mag), type);
+	        if (this.balls.length < 9 && (start.clone().subtract(end).length() > 35)) {
 	            this.balls.push(launched);
 	        }
 	        else if (this.stage === stage.waiting) {

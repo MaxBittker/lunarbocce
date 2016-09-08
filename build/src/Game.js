@@ -34,7 +34,7 @@ var Game = (function () {
         this.planets = this.genPlanets();
     };
     Game.prototype.randomPoint = function () {
-        var e = 210;
+        var e = 280;
         var p = new Victor(0, 0);
         p.randomize(new Victor(e, (e / 2)), new Victor(Universals_1.default.bounds.x - (e / 2), Universals_1.default.bounds.y - e));
         return p;
@@ -45,7 +45,7 @@ var Game = (function () {
         var planets = [];
         var fuse = 10000;
         var _loop_1 = function() {
-            var radius = Math.random() * 140 * (n / on) + 40;
+            var radius = Math.random() * 130 * (n / on) + 60;
             var newPlanet = new Planet_1.default(this_1.randomPoint(), Math.PI * radius * radius, radius, tinycolor.random().darken(0.9).toRgbString());
             var distances = planets.map(function (p) { return Body_1.seperation(newPlanet, p); });
             if (Math.min.apply(Math, distances) > 100) {
@@ -92,8 +92,10 @@ var Game = (function () {
         if (!isBoccino) {
             type = (this.balls.length + offset) % 2 ? team.red : team.green;
         }
-        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
-        if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {
+        var v = start.clone().subtract(end);
+        var mag = Math.min(90, v.length());
+        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), v.clone().normalize().multiplyScalar(mag), type);
+        if (this.balls.length < 9 && (start.clone().subtract(end).length() > 35)) {
             this.balls.push(launched);
         }
         else if (this.stage === stage.waiting) {

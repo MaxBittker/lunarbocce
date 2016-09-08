@@ -52,17 +52,21 @@ var Renderer = (function () {
         if (this.controls.startDrag && this.controls.mousePos) {
             var v = this.controls.startDrag.clone().subtract(this.controls.mousePos)
                 .multiplyScalar(0.3);
+            var mag = Math.min(50, v.length());
             this.ctx.fillStyle = "rgba(200, 200, 200, 0.2)";
+            if ((mag / 0.3) < 35) {
+                this.ctx.fillStyle = "rgba(200, 100, 100, 0.2)";
+            }
             this.ctx.strokeStyle = "rgba(200, 200, 200, 0.2)";
-            this.ctx.lineWidth = v.length() / 6;
+            this.ctx.lineWidth = mag / 5;
             this.ctx.setLineDash([1]);
-            var endP = Universals_1.default.launchPos.clone().subtract(v);
+            var endP = Universals_1.default.launchPos.clone().subtract(v.clone().normalize().multiplyScalar(mag * 1.5));
             this.ctx.beginPath();
             this.ctx.moveTo(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y);
             this.ctx.lineTo(endP.x, endP.y);
             this.ctx.stroke();
             this.ctx.beginPath();
-            this.ctx.arc(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y, this.controls.startDrag.distance(this.controls.mousePos) / 5, 0, 180);
+            this.ctx.arc(Universals_1.default.launchPos.x, Universals_1.default.launchPos.y, mag, 0, 180);
             this.ctx.fill();
         }
     };
