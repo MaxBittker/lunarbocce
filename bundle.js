@@ -97,10 +97,10 @@
 	    function Renderer(ctx) {
 	        this.ctx = ctx;
 	    }
-	    Renderer.prototype.render = function (bodys, shots) {
+	    Renderer.prototype.render = function (bodys, shots, whoStart) {
 	        this.ctx.fillStyle = "hsla(180, 0% ,10%,0.5)";
 	        this.ctx.fillRect(0, 0, Universals_1.default.bounds.x, Universals_1.default.bounds.y);
-	        var allBalls = bodys.concat(this.hudBalls(9 - shots));
+	        var allBalls = bodys.concat(this.hudBalls(9 - shots, whoStart));
 	        for (var i in allBalls) {
 	            var ball = allBalls[i];
 	            this.renderBall(ball);
@@ -149,13 +149,19 @@
 	            this.ctx.fill();
 	        }
 	    };
-	    Renderer.prototype.hudBalls = function (nleft) {
+	    Renderer.prototype.hudBalls = function (nleft, whoStart) {
 	        var left = [team.boccino];
 	        var i = 0;
 	        while (i < 4) {
 	            i++;
-	            left.push(team.red);
-	            left.push(team.green);
+	            if (whoStart === team.red) {
+	                left.push(team.red);
+	                left.push(team.green);
+	            }
+	            else {
+	                left.push(team.green);
+	                left.push(team.red);
+	            }
 	        }
 	        var balls = left.slice(9 - nleft).map(function (team, i) {
 	            var offset = Universals_1.default.bounds.y - (100 + (i * 20));
@@ -178,7 +184,7 @@
 	        this.ctx.font = "30px 'Helvetica'";
 	        this.ctx.textBaseline = 'alphabetic';
 	        // this.ctx.scale(1,1);
-	        // animTick/=1
+	        animTick /= 2;
 	        var done = true;
 	        var rate = 1;
 	        for (var i = 0; i < scoreBalls.length; i++) {
@@ -203,7 +209,7 @@
 	                this.ctx.fillText(mark, ball.position.x, ball.position.y);
 	                this.ctx.strokeText(mark, ball.position.x, ball.position.y);
 	            }
-	            animTick -= r;
+	            // animTick -= r
 	            this.ctx.lineCap = "round";
 	            this.ctx.lineWidth = 1;
 	            this.ctx.setLineDash([2, 10]);
@@ -353,7 +359,7 @@
 	                if (vn > 0) {
 	                    continue;
 	                }
-	                var i = (-(0.7) * vn) / (im1 + im2);
+	                var i = (-(0.6) * vn) / (im1 + im2);
 	                var impulse = mtd.clone().multiplyScalar(i);
 	                this.velocity.add(impulse.clone().multiplyScalar(im1));
 	                ball.velocity.subtract(impulse.clone().multiplyScalar(im2));
@@ -3012,7 +3018,7 @@
 	        this.planets = this.genPlanets();
 	    };
 	    Game.prototype.randomPoint = function () {
-	        var e = 190;
+	        var e = 210;
 	        var p = new Victor(0, 0);
 	        p.randomize(new Victor(e, (e / 2)), new Victor(Universals_1.default.bounds.x - (e / 2), Universals_1.default.bounds.y - e));
 	        return p;
@@ -3044,7 +3050,7 @@
 	    Game.prototype.tick = function () {
 	        var _this = this;
 	        var bodys = this.balls.concat(this.planets);
-	        this.renderer.render(bodys, this.balls.length);
+	        this.renderer.render(bodys, this.balls.length, (this.points[team.red] < this.points[team.green]) ? team.green : team.red);
 	        this.renderer.renderHUD(this.points);
 	        if (this.stage === stage.play) {
 	            var settle = this.balls.map(function (b) { return b.update(_this.planets, _this.balls); });
@@ -3066,8 +3072,9 @@
 	    Game.prototype.launch = function (start, end) {
 	        var isBoccino = this.balls.length == 0;
 	        var type = team.boccino;
+	        var offset = (this.points[team.red] < this.points[team.green]) ? 1 : 0;
 	        if (!isBoccino) {
-	            type = this.balls.length % 2 ? team.red : team.green;
+	            type = (this.balls.length + offset) % 2 ? team.red : team.green;
 	        }
 	        var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
 	        if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {

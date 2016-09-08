@@ -15,10 +15,10 @@ var Renderer = (function () {
     function Renderer(ctx) {
         this.ctx = ctx;
     }
-    Renderer.prototype.render = function (bodys, shots) {
+    Renderer.prototype.render = function (bodys, shots, whoStart) {
         this.ctx.fillStyle = "hsla(180, 0% ,10%,0.5)";
         this.ctx.fillRect(0, 0, Universals_1.default.bounds.x, Universals_1.default.bounds.y);
-        var allBalls = bodys.concat(this.hudBalls(9 - shots));
+        var allBalls = bodys.concat(this.hudBalls(9 - shots, whoStart));
         for (var i in allBalls) {
             var ball = allBalls[i];
             this.renderBall(ball);
@@ -66,13 +66,19 @@ var Renderer = (function () {
             this.ctx.fill();
         }
     };
-    Renderer.prototype.hudBalls = function (nleft) {
+    Renderer.prototype.hudBalls = function (nleft, whoStart) {
         var left = [team.boccino];
         var i = 0;
         while (i < 4) {
             i++;
-            left.push(team.red);
-            left.push(team.green);
+            if (whoStart === team.red) {
+                left.push(team.red);
+                left.push(team.green);
+            }
+            else {
+                left.push(team.green);
+                left.push(team.red);
+            }
         }
         var balls = left.slice(9 - nleft).map(function (team, i) {
             var offset = Universals_1.default.bounds.y - (100 + (i * 20));
@@ -93,6 +99,7 @@ var Renderer = (function () {
         this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         this.ctx.font = "30px 'Helvetica'";
         this.ctx.textBaseline = 'alphabetic';
+        animTick /= 2;
         var done = true;
         var rate = 1;
         for (var i = 0; i < scoreBalls.length; i++) {
@@ -117,7 +124,6 @@ var Renderer = (function () {
                 this.ctx.fillText(mark, ball.position.x, ball.position.y);
                 this.ctx.strokeText(mark, ball.position.x, ball.position.y);
             }
-            animTick -= r;
             this.ctx.lineCap = "round";
             this.ctx.lineWidth = 1;
             this.ctx.setLineDash([2, 10]);

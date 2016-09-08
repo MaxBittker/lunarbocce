@@ -34,7 +34,7 @@ var Game = (function () {
         this.planets = this.genPlanets();
     };
     Game.prototype.randomPoint = function () {
-        var e = 190;
+        var e = 210;
         var p = new Victor(0, 0);
         p.randomize(new Victor(e, (e / 2)), new Victor(Universals_1.default.bounds.x - (e / 2), Universals_1.default.bounds.y - e));
         return p;
@@ -66,7 +66,7 @@ var Game = (function () {
     Game.prototype.tick = function () {
         var _this = this;
         var bodys = this.balls.concat(this.planets);
-        this.renderer.render(bodys, this.balls.length);
+        this.renderer.render(bodys, this.balls.length, (this.points[team.red] < this.points[team.green]) ? team.green : team.red);
         this.renderer.renderHUD(this.points);
         if (this.stage === stage.play) {
             var settle = this.balls.map(function (b) { return b.update(_this.planets, _this.balls); });
@@ -88,8 +88,9 @@ var Game = (function () {
     Game.prototype.launch = function (start, end) {
         var isBoccino = this.balls.length == 0;
         var type = team.boccino;
+        var offset = (this.points[team.red] < this.points[team.green]) ? 1 : 0;
         if (!isBoccino) {
-            type = this.balls.length % 2 ? team.red : team.green;
+            type = (this.balls.length + offset) % 2 ? team.red : team.green;
         }
         var launched = new Ball_1.default(Universals_1.default.launchPos.clone(), start.clone().subtract(end).multiplyScalar(0.65), type);
         if (this.balls.length < 9 && (start.clone().subtract(end).multiplyScalar(0.65).length() > 15)) {

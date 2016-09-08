@@ -18,11 +18,11 @@ export default class Renderer {
   constructor(ctx:CanvasRenderingContext2D) {
     this.ctx = ctx
   }
-  render(bodys: Array<Body>, shots:number) {
+  render(bodys: Array<Body>, shots:number, whoStart:team) {
     this.ctx.fillStyle = `hsla(180, 0% ,10%,0.5)`
 
     this.ctx.fillRect(0,0,Universals.bounds.x,Universals.bounds.y)
-    let allBalls = [...bodys, ...this.hudBalls(9-shots)]
+    let allBalls = [...bodys, ...this.hudBalls(9-shots, whoStart)]
 
     for (let i in allBalls){
       let ball = allBalls[i]
@@ -103,13 +103,18 @@ export default class Renderer {
     this.ctx.fill()
     }
   }
-  hudBalls(nleft:number): Array<Ball>{
+  hudBalls(nleft:number, whoStart:number): Array<Ball>{
     let left = [team.boccino]
     var i =0
     while(i<4){
       i++
-      left.push(team.red)
-      left.push(team.green)
+      if(whoStart === team.red){
+        left.push(team.red)
+        left.push(team.green)
+      }else {
+        left.push(team.green)
+        left.push(team.red)
+      }
     }
     let balls: Array<Ball> = left.slice(9-nleft).map((team,i)=>{
     let offset:number = Universals.bounds.y - (100+(i*20))
@@ -142,7 +147,7 @@ export default class Renderer {
     this.ctx.textBaseline = 'alphabetic';
     // this.ctx.scale(1,1);
 
-    // animTick/=1
+    animTick/=2
     let done = true
     let rate = 1;
     for(var i=0; i<scoreBalls.length;i++){
@@ -168,7 +173,7 @@ export default class Renderer {
         this.ctx.fillText (mark, ball.position.x, ball.position.y);
         this.ctx.strokeText (mark, ball.position.x, ball.position.y);
       }
-      animTick -= r
+      // animTick -= r
 
       this.ctx.lineCap="round";
       this.ctx.lineWidth = 1;

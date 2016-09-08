@@ -32,7 +32,7 @@ export default class Game {
     this.planets = this.genPlanets()
   }
   randomPoint(): Victor{
-    let e:number = 190
+    let e:number = 210
     let p:Victor = new Victor(0,0)
     p.randomize(new Victor(e,(e/2)), new Victor(Universals.bounds.x-(e/2),Universals.bounds.y-e))
     return p
@@ -63,7 +63,7 @@ export default class Game {
   }
   tick(){
       let bodys: Array<Body> = [...this.balls,...this.planets]
-      this.renderer.render(bodys,this.balls.length)
+      this.renderer.render(bodys,this.balls.length, (this.points[team.red]<this.points[team.green])? team.green: team.red)
       this.renderer.renderHUD(this.points)
       if(this.stage===stage.play){
         let settle = this.balls.map(b=>b.update(this.planets, this.balls))
@@ -86,8 +86,9 @@ export default class Game {
   launch(start:Victor,end:Victor){
     let isBoccino = this.balls.length ==0
     let type:team = team.boccino
+    let offset = (this.points[team.red]<this.points[team.green])? 1 : 0
     if(!isBoccino){
-      type = this.balls.length%2? team.red: team.green
+      type = (this.balls.length+offset)%2 ? team.red: team.green
     }
 
     let launched: Ball = new Ball(
